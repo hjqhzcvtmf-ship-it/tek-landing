@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TEK - You found TEK!</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@700&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+        body::before {
+          content: '';
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100vw;
+          height: 100vh;
+          pointer-events: none;
+          background: linear-gradient(120deg, rgba(0,255,100,0.18) 0%, rgba(0,255,41,0.22) 100%);
+          mix-blend-mode: color;
+          z-index: 1;
+        }
+    
+        .container, h1, p, .apply-btn, .logo {
+          position: relative;
+          z-index: 2;
+        }
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background: url('eye.png') no-repeat center center fixed;
+      background-size: cover;
+      min-height: 100vh;
+      color: #e6e6c7;
+      font-family: 'Montserrat', 'Share Tech Mono', 'Orbitron', Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-shadow: 0 1px 8px #1a1a1a, 0 0 2px #000;
+    }
+    .container {
+      padding: 48px 32px 32px 32px;
+      text-align: center;
+      margin-top: 10vh;
+    }
+    h1 {
+      font-family: 'Orbitron', 'Share Tech Mono', monospace;
+      font-size: 2.7em;
+      margin-bottom: 0.5em;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: #ffe9a7;
+      text-shadow: 0 0 8px #2e2e1a, 0 0 2px #ffe9a7, 0 0 24px #ffe9a7;
+    }
+    p {
+      font-family: 'Montserrat', 'Share Tech Mono', Arial, sans-serif;
+      font-size: 1.25em;
+      margin-bottom: 2em;
+      color: #e6e6c7;
+      text-shadow: 0 1px 8px #1a1a1a, 0 0 2px #ffe9a7;
+    }
+    .apply-btn {
+      background: rgba(0,0,0,0.5);
+      color: #ffe9a7;
+      border: 1.5px solid #ffe9a7;
+      border-radius: 8px;
+      padding: 0.7em 2.2em;
+      font-size: 1.2em;
+      font-family: 'Orbitron', 'Share Tech Mono', monospace;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 0 8px #ffe9a7;
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+      text-shadow: 0 0 8px #ffe9a7, 0 0 2px #000;
+      letter-spacing: 1px;
+    }
+    .apply-btn:hover {
+      background: #ffe9a7;
+      color: #181818;
+      box-shadow: 0 0 16px #ffe9a7, 0 0 8px #fff;
+    }
+    .logo {
+      margin-top: 3em;
+      opacity: 0.95;
+      font-size: 2.2em;
+      letter-spacing: 0.25em;
+      font-family: 'Orbitron', 'Share Tech Mono', monospace;
+      color: #ffe9a7;
+      text-shadow: 0 0 16px #ffe9a7, 0 0 2px #000;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>You found TEK!</h1>
+    <p>Are you ready to<br>be a part of something new?</p>
+    <a href="https://apps.apple.com/app/idYOUR_APP_ID" class="apply-btn">APPLY</a>
+    <div class="logo">TEK</div>
+  </div>
+</body>
+</html>
