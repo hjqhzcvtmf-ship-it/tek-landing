@@ -332,68 +332,48 @@
                     console.warn('Anonymous sign-in error:', authErr);
                 }
 
-                // Get all applications
-                console.log('Fetching applications...');
-                const snapshot = await db.collection('applications').get();
-                console.log('Found', snapshot.docs.length, 'applications');
+                // Use Cloud Function to validate (same as app does)
+                console.log('Calling activateApplicationSessionByReferralCode Cloud Function...');
+                const functions = firebase.functions('us-central1');
+                const activate = functions.httpsCallable('activateApplicationSessionByReferralCode');
+                
+                const result = await activate({ referralCode: code, deviceId: 'web-browser' });
+                console.log('Cloud Function result:', result.data);
 
-                let found = null;
-                for (const doc of snapshot.docs) {
-                    const data = doc.data();
-                    console.log('Checking doc:', doc.id, 'with code:', data.referralCode, 'status:', data.status);
-                    if (data.referralCode && data.referralCode.toUpperCase() === code) {
-                        found = { doc, data };
-                        console.log('Found matching referral code for:', data.name);
-                        break;
-                    }
-                }
+                const appId = result.data.appId;
+                const sessionId = result.data.sessionId;
 
-                if (!found) {
-                    console.log('No matching referral code found in applications collection');
-                    console.log('Checking if user exists in users collection by name...');
-                    
-                    // Fallback: Check if this is an existing user in the 'users' collection
-                    // by looking through all users
-                    const usersSnapshot = await db.collection('users').get();
-                    console.log('Found', usersSnapshot.docs.length, 'users in users collection');
-                    
-                    // Try to find by exact code match
-                    for (const userDoc of usersSnapshot.docs) {
-                        const userData = userDoc.data();
-                        console.log('Checking user:', userData.name || userDoc.id, 'with code:', userData.referralCode);
-                        if (userData.referralCode && userData.referralCode.toUpperCase() === code) {
-                            found = { doc: userDoc, data: userData };
-                            console.log('Found user in users collection with matching code');
-                            break;
-                        }
-                    }
-                    
-                    if (!found) {
-                        showError('Referral code not found. Make sure your account has been approved by admin.');
-                        document.getElementById('buttonText').style.display = 'block';
-                        document.getElementById('loading').style.display = 'none';
-                        document.getElementById('submitBtn').disabled = false;
-                        return;
-                    }
-                }
-
-                console.log('User status:', found.data.status);
-
-                if (found.data.status !== 'approved') {
-                    showError('Your application status: ' + found.data.status + '. Waiting for admin approval.');
+                if (!appId || !sessionId) {
+                    showError('Invalid response from server');
                     document.getElementById('buttonText').style.display = 'block';
                     document.getElementById('loading').style.display = 'none';
                     document.getElementById('submitBtn').disabled = false;
                     return;
                 }
 
+                // Now fetch the application document to get user data
+                console.log('Fetching application data for appId:', appId);
+                const docSnapshot = await db.collection('applications').doc(appId).get();
+                
+                if (!docSnapshot.exists) {
+                    showError('Application data not found');
+                    document.getElementById('buttonText').style.display = 'block';
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('submitBtn').disabled = false;
+                    return;
+                }
+
+                const userData = docSnapshot.data();
+                console.log('User data:', userData);
+
                 // Save to session
                 console.log('Saving user data to session...');
-                sessionStorage.setItem('userName', found.data.name || '');
-                sessionStorage.setItem('userEmail', found.data.email || '');
+                sessionStorage.setItem('userName', userData.name || '');
+                sessionStorage.setItem('userEmail', userData.email || '');
                 sessionStorage.setItem('referralCode', code);
-                sessionStorage.setItem('userId', found.doc.id);
-                sessionStorage.setItem('userData', JSON.stringify(found.data));
+                sessionStorage.setItem('userId', appId);
+                sessionStorage.setItem('sessionId', sessionId);
+                sessionStorage.setItem('userData', JSON.stringify(userData));
 
                 console.log('User data saved, redirecting...');
                 showSuccess('Login successful! Redirecting...');
@@ -403,7 +383,19 @@
 
             } catch (err) {
                 console.error('Login error:', err);
-                showError('Error: ' + (err.message || err));
+                console.error('Error code:', err.code);
+                console.error('Error message:', err.message);
+                
+                let errorMsg = 'Error: ' + (err.message || err);
+                if (err.code === 'functions/not-found') {
+                    errorMsg = 'Cloud Function not found. Contact admin.';
+                } else if (err.code === 'functions/unauthenticated') {
+                    errorMsg = 'Authentication failed. Please refresh and try again.';
+                } else if (err.code === 'functions/invalid-argument') {
+                    errorMsg = 'Invalid referral code.';
+                }
+                
+                showError(errorMsg);
                 document.getElementById('buttonText').style.display = 'block';
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('submitBtn').disabled = false;
