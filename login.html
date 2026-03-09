@@ -280,7 +280,7 @@
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
-            const referralCode = document.getElementById('referralCode').value.trim();
+            const referralCode = document.getElementById('referralCode').value.trim().toUpperCase();
 
             if (!referralCode) {
                 showError('Please enter your referral code');
@@ -298,13 +298,28 @@
                     await auth.signInAnonymously();
                 }
 
-                // Query Firestore for user with matching referral code
-                const userQuery = await db.collection('applications')
+                // Query Firestore for user with matching referral code (case-insensitive)
+                let userDoc = null;
+                let userQuery = await db.collection('applications')
                     .where('referralCode', '==', referralCode)
                     .limit(1)
                     .get();
 
                 if (userQuery.empty) {
+                    // Try searching all documents if index doesn't exist
+                    const allApps = await db.collection('applications').get();
+                    for (const doc of allApps.docs) {
+                        const code = doc.data().referralCode;
+                        if (code && code.toUpperCase() === referralCode) {
+                            userDoc = doc;
+                            break;
+                        }
+                    }
+                } else {
+                    userDoc = userQuery.docs[0];
+                }
+
+                if (!userDoc) {
                     showError('Invalid referral code. Please check and try again.');
                     document.getElementById('buttonText').style.display = 'block';
                     document.getElementById('loading').style.display = 'none';
@@ -312,31 +327,32 @@
                     return;
                 }
 
-                const userData = userQuery.docs[0].data();
+                const userData = userDoc.data();
                 
                 // Check if application is approved
                 if (userData.status !== 'approved') {
-                    showError('Your application is still under review. Please check your email for updates.');
+                    showError('Your application is still under review (' + userData.status + '). Please check your email for updates.');
                     document.getElementById('buttonText').style.display = 'block';
                     document.getElementById('loading').style.display = 'none';
                     document.querySelector('.login-btn-submit').disabled = false;
                     return;
                 }
 
-                // Successful login - store session and redirect to tickets page
-                sessionStorage.setItem('userEmail', userData.email);
+                // Successful login - store session and redirect to profile page
+                sessionStorage.setItem('userEmail', userData.email || '');
                 sessionStorage.setItem('referralCode', referralCode);
-                sessionStorage.setItem('userName', userData.name);
-                sessionStorage.setItem('userId', userQuery.docs[0].id);
+                sessionStorage.setItem('userName', userData.name || '');
+                sessionStorage.setItem('userId', userDoc.id);
+                sessionStorage.setItem('userData', JSON.stringify(userData));
 
                 showSuccess('Login successful! Redirecting...');
                 setTimeout(() => {
-                    window.location.href = 'tickets.html';
+                    window.location.href = 'profile.html';
                 }, 1500);
 
             } catch (error) {
                 console.error('Login error:', error);
-                showError('An error occurred. Please try again.');
+                showError('Error: ' + error.message);
                 document.getElementById('buttonText').style.display = 'block';
                 document.getElementById('loading').style.display = 'none';
                 document.querySelector('.login-btn-submit').disabled = false;

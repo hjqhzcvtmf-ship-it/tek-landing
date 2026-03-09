@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TEK - Events & Tickets</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@700&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            background: linear-gradient(120deg, rgba(0,255,100,0.18) 0%, rgba(0,255,41,0.22) 100%);
+            mix-blend-mode: color;
+            z-index: 1;
+        }
+
+        * {
+            position: relative;
+            z-index: 2;
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: url('eye.png') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+            color: #e6e6c7;
+            font-family: 'Montserrat', 'Share Tech Mono', 'Orbitron', Arial, sans-serif;
+            padding: 0;
+        }
+
+        header {
+            background: rgba(0, 0, 0, 0.7);
+            border-bottom: 1.5px solid #ffe9a7;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: 'Orbitron', 'Share Tech Mono', monospace;
+            font-size: 1.8em;
+            letter-spacing: 0.2em;
+            color: #ffe9a7;
+        }
+
+        nav {
+            display: flex;
+            gap: 30px;
+        }
+
+        nav a {
+            color: #ffe9a7;
+            text-decoration: none;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+            letter-spacing: 0.05em;
+        }
+
+        nav a:hover {
+            color: #00ff41;
+            text-shadow: 0 0 10px #00ff41;
+        }
+
+        nav a.active {
+            color: #00ff41;
+            border-bottom: 2px solid #00ff41;
+            padding-bottom: 5px;
+        }
+
+        .user-info {
+            text-align: right;
+            font-size: 0.9em;
+        }
+
+        .logout-btn {
+            padding: 8px 16px;
+            border: 1.5px solid #ffe9a7;
+            background: transparent;
+            color: #ffe9a7;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            font-family: 'Orbitron', 'Share Tech Mono', monospace;
+            margin-top: 10px;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 233, 167, 0.1);
+            box-shadow: 0 0 10px #ffe9a7;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        h1 {
+            text-align: center;
+            font-family: 'Orbitron', 'Share Tech Mono', monospace;
+            font-size: 2.2em;
+            margin-bottom: 40px;
+            color: #ffe9a7;
+            text-shadow: 0 0 8px #ffe9a7;
+            letter-spacing: 0.1em;
+        }
+
+        .events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .event-card {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1.5px solid #ffe9a7;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(255, 233, 167, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .event-card:hover {
+            background: rgba(0, 0, 0, 0.8);
+            box-shadow: 0 0 25px rgba(255, 233, 167, 0.3);
+            transform: translateY(-5px);
+        }
+
+        .event-header {
+            background: linear-gradient(135deg, rgba(0, 255, 65, 0.1), rgba(255, 233, 167, 0.1));
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 233, 167, 0.2);
+        }
+
+        .event-date {
+            font-size: 0.85em;
+            color: #00ff41;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+        }
+
+        .event-title {
+            font-family: 'Orbitron', 'Share Tech Mono', monospace;
+            font-size: 1.4em;
+            color: #ffe9a7;
+            margin: 0;
+            letter-spacing: 0.05em;
+        }
+
+        .event-body {
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .event-info {
+            margin-bottom: 15px;
+        }
+
+        .event-info-label {
+            font-size: 0.8em;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .event-info-value {
+            font-size: 0.95em;
+            color: #e6e6c7;
+        }
+
+        .event-description {
+            color: #a6a67f;
+            font-size: 0.9em;
+            line-height: 1.5;
+            margin-bottom: 20px;
+            flex: 1;
+        }
+
+        .ticket-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .ticket-btn {
+            padding: 10px;
+            border: 1.5px solid #ffe9a7;
+            background: rgba(0, 0, 0, 0.5);
+            color: #ffe9a7;
+            font-size: 0.85em;
+            font-weight: 700;
+            letter-spacing: 1px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            font-family: 'Orbitron', 'Share Tech Mono', monospace;
+            text-transform: uppercase;
+        }
+
+        .ticket-btn:hover {
+            background: #ffe9a7;
+            color: #181818;
+            box-shadow: 0 0 12px #ffe9a7;
+        }
+
+        .ticket-price {
+            font-size: 0.75em;
+            color: #00ff41;
+            font-weight: bold;
+        }
+
+        .coming-soon {
+            text-align: center;
+            padding: 60px 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px dashed #ffe9a7;
+            border-radius: 8px;
+            color: #a6a67f;
+        }
+
+        .coming-soon h2 {
+            color: #ffe9a7;
+            font-family: 'Orbitron', 'Share Tech Mono', monospace;
+            margin-bottom: 10px;
+            font-size: 1.6em;
+        }
+
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            nav {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            h1 {
+                font-size: 1.6em;
+            }
+
+            .events-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .ticket-options {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">TEK</div>
+        <nav>
+            <a href="profile.html">PROFILE</a>
+            <a href="events.html" class="active">EVENTS</a>
+        </nav>
+        <div class="user-info">
+            <div>Welcome, <span id="userName">Member</span></div>
+            <button onclick="logout()" class="logout-btn">LOG OUT</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <h1>🎉 UPCOMING EVENTS</h1>
+
+        <div class="events-grid" id="eventsContainer">
+            <!-- Events will be loaded here -->
+        </div>
+
+        <div class="coming-soon">
+            <h2>🎫 Ticket Sales Coming Soon</h2>
+            <p>We're currently setting up the ticketing and payment system. Check back soon to purchase your tickets!</p>
+            <p style="font-size: 0.9em; color: #666;">In the meantime, stay tuned for announcements about our upcoming events.</p>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAMMtUtonXEVkPiRmF5SRYw2r97qUQ-yFo",
+            authDomain: "tek-nightclub-app.firebaseapp.com",
+            projectId: "tek-nightclub-app",
+            storageBucket: "tek-nightclub-app.appspot.com",
+            messagingSenderId: "501085259012",
+            appId: "1:501085259012:web:f29d88121166df82563c51"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        const sampleEvents = [
+            {
+                title: "TEK LAUNCH PARTY",
+                date: "March 20, 2026",
+                time: "10:00 PM",
+                location: "Downtown Club",
+                description: "Join us for the official TEK community launch celebration! Music, dancing, and exclusive community members only.",
+                generalPrice: 25,
+                vipPrice: 50
+            },
+            {
+                title: "MEMBERS NIGHT",
+                date: "March 27, 2026",
+                time: "9:00 PM",
+                location: "Downtown Club",
+                description: "An exclusive night for all TEK members. Enjoy special pricing on drinks and networking with the community.",
+                generalPrice: 20,
+                vipPrice: 40
+            },
+            {
+                title: "TECHNO NIGHT",
+                date: "April 3, 2026",
+                time: "11:00 PM",
+                location: "Downtown Club",
+                description: "Electronic music festival featuring local and international DJs. Get your dance shoes ready!",
+                generalPrice: 30,
+                vipPrice: 60
+            }
+        ];
+
+        window.addEventListener('load', function() {
+            const userName = sessionStorage.getItem('userName');
+            if (!userName) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            document.getElementById('userName').textContent = userName;
+            loadEvents();
+        });
+
+        function loadEvents() {
+            const container = document.getElementById('eventsContainer');
+            container.innerHTML = '';
+
+            sampleEvents.forEach(event => {
+                const eventCard = document.createElement('div');
+                eventCard.className = 'event-card';
+                eventCard.innerHTML = `
+                    <div class="event-header">
+                        <div class="event-date">${event.date} • ${event.time}</div>
+                        <h2 class="event-title">${event.title}</h2>
+                    </div>
+                    <div class="event-body">
+                        <div class="event-info">
+                            <div class="event-info-label">📍 Location</div>
+                            <div class="event-info-value">${event.location}</div>
+                        </div>
+                        <div class="event-description">${event.description}</div>
+                        <div class="ticket-options">
+                            <button onclick="buyTicket('${event.title}', 'General', ${event.generalPrice})" class="ticket-btn">
+                                GENERAL<br><span class="ticket-price">$${event.generalPrice}</span>
+                            </button>
+                            <button onclick="buyTicket('${event.title}', 'VIP', ${event.vipPrice})" class="ticket-btn">
+                                VIP<br><span class="ticket-price">$${event.vipPrice}</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(eventCard);
+            });
+        }
+
+        function buyTicket(eventTitle, ticketType, price) {
+            const userName = sessionStorage.getItem('userName');
+            alert(`Event: ${eventTitle}\nTicket: ${ticketType} - $${price}\n\nPayment processing coming soon!\n\nYou will be able to complete your purchase here soon.`);
+            
+            // TODO: Integrate Stripe for actual ticket purchasing
+        }
+
+        function logout() {
+            sessionStorage.clear();
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
