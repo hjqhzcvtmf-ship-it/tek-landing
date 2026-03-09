@@ -113,7 +113,6 @@
             text-transform: uppercase;
         }
 
-        input[type="email"],
         input[type="text"] {
             width: 100%;
             padding: 10px;
@@ -127,7 +126,6 @@
             box-sizing: border-box;
         }
 
-        input[type="email"]:focus,
         input[type="text"]:focus {
             outline: none;
             border-color: #fff;
@@ -177,18 +175,24 @@
             box-shadow: 0 0 12px #ffe9a7;
         }
 
-        .error {
-            color: #ff6b6b;
+        .message {
             font-size: 0.85em;
             margin-top: 0.5em;
             display: none;
+            padding: 10px;
+            border-radius: 6px;
         }
 
-        .success {
+        .message.error {
+            color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.1);
+            border: 1px solid rgba(255, 107, 107, 0.3);
+        }
+
+        .message.success {
             color: #00ff41;
-            font-size: 0.85em;
-            margin-top: 0.5em;
-            display: none;
+            background: rgba(0, 255, 65, 0.1);
+            border: 1px solid rgba(0, 255, 65, 0.3);
         }
 
         .loading {
@@ -228,11 +232,11 @@
                     <small style="color: #999; font-size: 0.85em; margin-top: 0.3em; display: block;">You received this in your approval email</small>
                 </div>
 
-                <div id="errorMsg" class="error"></div>
-                <div id="successMsg" class="success"></div>
+                <div id="errorMsg" class="message error"></div>
+                <div id="successMsg" class="message success"></div>
 
                 <div class="button-group">
-                    <button type="submit" class="login-btn-submit">
+                    <button type="submit" class="login-btn-submit" id="submitBtn">
                         <span id="buttonText">LOG IN</span>
                         <div class="loading" id="loading">
                             <div class="spinner"></div>
@@ -250,6 +254,9 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js"></script>
 
     <script>
+        let db, auth;
+
+        // Initialize Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyAMMtUtonXEVkPiRmF5SRYw2r97qUQ-yFo",
             authDomain: "tek-nightclub-app.firebaseapp.com",
@@ -260,19 +267,21 @@
         };
 
         firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const auth = firebase.auth();
+        db = firebase.firestore();
+        auth = firebase.auth();
 
-        function showError(message) {
+        console.log('Firebase initialized');
+
+        function showError(msg) {
             const errorDiv = document.getElementById('errorMsg');
-            errorDiv.textContent = message;
+            errorDiv.textContent = msg;
             errorDiv.style.display = 'block';
             document.getElementById('successMsg').style.display = 'none';
         }
 
-        function showSuccess(message) {
+        function showSuccess(msg) {
             const successDiv = document.getElementById('successMsg');
-            successDiv.textContent = message;
+            successDiv.textContent = msg;
             successDiv.style.display = 'block';
             document.getElementById('errorMsg').style.display = 'none';
         }
@@ -280,104 +289,76 @@
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
-            const referralCode = document.getElementById('referralCode').value.trim().toUpperCase();
+            const code = document.getElementById('referralCode').value.trim().toUpperCase();
 
-            if (!referralCode) {
+            if (!code) {
                 showError('Please enter your referral code');
                 return;
             }
 
-            // Show loading state
+            console.log('Login attempt with code:', code);
+
+            // Show loading
             document.getElementById('buttonText').style.display = 'none';
             document.getElementById('loading').style.display = 'block';
-            document.querySelector('.login-btn-submit').disabled = true;
+            document.getElementById('submitBtn').disabled = true;
 
             try {
-                // Sign in anonymously if needed
+                // Sign in anonymously
                 if (!auth.currentUser) {
                     await auth.signInAnonymously();
                 }
 
-                console.log('Searching for referral code:', referralCode);
+                // Get all applications
+                const snapshot = await db.collection('applications').get();
+                console.log('Found', snapshot.docs.length, 'applications');
 
-                // Try querying with referralCode field
-                let userDoc = null;
-                try {
-                    const userQuery = await db.collection('applications')
-                        .where('referralCode', '==', referralCode)
-                        .limit(1)
-                        .get();
-
-                    if (!userQuery.empty) {
-                        userDoc = userQuery.docs[0];
-                        console.log('Found user with referralCode query');
-                    }
-                } catch (err) {
-                    console.log('referralCode query error (this is normal if index not built):', err.message);
-                }
-
-                // If not found with query, search all documents manually
-                if (!userDoc) {
-                    console.log('Manual search through all applications...');
-                    const allApps = await db.collection('applications').get();
-                    console.log('Total applications in database:', allApps.docs.length);
-                    
-                    for (const doc of allApps.docs) {
-                        const data = doc.data();
-                        const code = data.referralCode;
-                        console.log('Checking app:', data.name, 'Code:', code);
-                        
-                        if (code && code.toUpperCase() === referralCode) {
-                            userDoc = doc;
-                            console.log('Found matching referral code!');
-                            break;
-                        }
+                let found = null;
+                for (const doc of snapshot.docs) {
+                    const data = doc.data();
+                    if (data.referralCode && data.referralCode.toUpperCase() === code) {
+                        found = { doc, data };
+                        console.log('Found matching referral code');
+                        break;
                     }
                 }
 
-                if (!userDoc) {
-                    console.log('No user found with referral code:', referralCode);
-                    showError('Referral code not found. Please check and try again.');
+                if (!found) {
+                    console.log('No matching referral code found');
+                    showError('Referral code not found');
                     document.getElementById('buttonText').style.display = 'block';
                     document.getElementById('loading').style.display = 'none';
-                    document.querySelector('.login-btn-submit').disabled = false;
+                    document.getElementById('submitBtn').disabled = false;
                     return;
                 }
 
-                const userData = userDoc.data();
-                console.log('User data:', userData);
-                
-                // Check if application is approved
-                if (userData.status !== 'approved') {
-                    console.log('User status:', userData.status);
-                    showError('Your application is still under review (' + userData.status + '). You will get an approval email when ready.');
+                if (found.data.status !== 'approved') {
+                    console.log('User status:', found.data.status);
+                    showError('Status: ' + found.data.status);
                     document.getElementById('buttonText').style.display = 'block';
                     document.getElementById('loading').style.display = 'none';
-                    document.querySelector('.login-btn-submit').disabled = false;
+                    document.getElementById('submitBtn').disabled = false;
                     return;
                 }
 
-                // Successful login - store session and redirect to profile page
-                sessionStorage.setItem('userEmail', userData.email || '');
-                sessionStorage.setItem('referralCode', referralCode);
-                sessionStorage.setItem('userName', userData.name || '');
-                sessionStorage.setItem('userId', userDoc.id);
-                sessionStorage.setItem('userData', JSON.stringify(userData));
+                // Save to session
+                sessionStorage.setItem('userName', found.data.name || '');
+                sessionStorage.setItem('userEmail', found.data.email || '');
+                sessionStorage.setItem('referralCode', code);
+                sessionStorage.setItem('userId', found.doc.id);
+                sessionStorage.setItem('userData', JSON.stringify(found.data));
 
-                console.log('Login successful, redirecting to profile...');
-                showSuccess('Login successful! Redirecting...');
+                showSuccess('Login successful!');
                 setTimeout(() => {
                     window.location.href = 'profile.html';
-                }, 1500);
+                }, 1000);
 
-            } catch (error) {
-                console.error('Full login error:', error);
-                console.error('Error message:', error.message);
-                console.error('Error code:', error.code);
-                showError('Error: ' + error.message);
+            } catch (err) {
+                console.error('Login error:', err);
+                showError('Error: ' + err.message);
                 document.getElementById('buttonText').style.display = 'block';
                 document.getElementById('loading').style.display = 'none';
-                document.querySelector('.login-btn-submit').disabled = false;
+                document.getElementById('submitBtn').disabled = false;
             }
         });
     </script>
