@@ -340,7 +340,7 @@
                 let found = null;
                 for (const doc of snapshot.docs) {
                     const data = doc.data();
-                    console.log('Checking doc:', doc.id, 'with code:', data.referralCode);
+                    console.log('Checking doc:', doc.id, 'with code:', data.referralCode, 'status:', data.status);
                     if (data.referralCode && data.referralCode.toUpperCase() === code) {
                         found = { doc, data };
                         console.log('Found matching referral code for:', data.name);
@@ -349,12 +349,32 @@
                 }
 
                 if (!found) {
-                    console.log('No matching referral code found');
-                    showError('Referral code not found or invalid');
-                    document.getElementById('buttonText').style.display = 'block';
-                    document.getElementById('loading').style.display = 'none';
-                    document.getElementById('submitBtn').disabled = false;
-                    return;
+                    console.log('No matching referral code found in applications collection');
+                    console.log('Checking if user exists in users collection by name...');
+                    
+                    // Fallback: Check if this is an existing user in the 'users' collection
+                    // by looking through all users
+                    const usersSnapshot = await db.collection('users').get();
+                    console.log('Found', usersSnapshot.docs.length, 'users in users collection');
+                    
+                    // Try to find by exact code match
+                    for (const userDoc of usersSnapshot.docs) {
+                        const userData = userDoc.data();
+                        console.log('Checking user:', userData.name || userDoc.id, 'with code:', userData.referralCode);
+                        if (userData.referralCode && userData.referralCode.toUpperCase() === code) {
+                            found = { doc: userDoc, data: userData };
+                            console.log('Found user in users collection with matching code');
+                            break;
+                        }
+                    }
+                    
+                    if (!found) {
+                        showError('Referral code not found. Make sure your account has been approved by admin.');
+                        document.getElementById('buttonText').style.display = 'block';
+                        document.getElementById('loading').style.display = 'none';
+                        document.getElementById('submitBtn').disabled = false;
+                        return;
+                    }
                 }
 
                 console.log('User status:', found.data.status);
