@@ -223,14 +223,9 @@
         <div class="login-form">
             <form id="loginForm">
                 <div class="form-group">
-                    <label for="email">Email Address</label>
-                    <input type="email" id="email" name="email" placeholder="your.email@example.com" required>
-                </div>
-
-                <div class="form-group">
                     <label for="referralCode">Referral Code</label>
-                    <input type="text" id="referralCode" name="referralCode" placeholder="Your referral code from email" required>
-                    <small style="color: #999; font-size: 0.85em; margin-top: 0.3em; display: block;">You received this in the approval email</small>
+                    <input type="text" id="referralCode" name="referralCode" placeholder="Enter your referral code" required>
+                    <small style="color: #999; font-size: 0.85em; margin-top: 0.3em; display: block;">You received this in your approval email</small>
                 </div>
 
                 <div id="errorMsg" class="error"></div>
@@ -285,11 +280,10 @@
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
-            const email = document.getElementById('email').value.trim();
             const referralCode = document.getElementById('referralCode').value.trim();
 
-            if (!email || !referralCode) {
-                showError('Please fill in all fields');
+            if (!referralCode) {
+                showError('Please enter your referral code');
                 return;
             }
 
@@ -304,15 +298,14 @@
                     await auth.signInAnonymously();
                 }
 
-                // Query Firestore for user with matching email and referral code
+                // Query Firestore for user with matching referral code
                 const userQuery = await db.collection('applications')
-                    .where('email', '==', email)
                     .where('referralCode', '==', referralCode)
                     .limit(1)
                     .get();
 
                 if (userQuery.empty) {
-                    showError('Invalid email or referral code. Please check and try again.');
+                    showError('Invalid referral code. Please check and try again.');
                     document.getElementById('buttonText').style.display = 'block';
                     document.getElementById('loading').style.display = 'none';
                     document.querySelector('.login-btn-submit').disabled = false;
@@ -331,7 +324,7 @@
                 }
 
                 // Successful login - store session and redirect to tickets page
-                sessionStorage.setItem('userEmail', email);
+                sessionStorage.setItem('userEmail', userData.email);
                 sessionStorage.setItem('referralCode', referralCode);
                 sessionStorage.setItem('userName', userData.name);
                 sessionStorage.setItem('userId', userQuery.docs[0].id);
