@@ -334,7 +334,7 @@
 
                 // Use Cloud Function to validate (same as app does)
                 console.log('Calling activateApplicationSessionByReferralCode Cloud Function...');
-                const functions = firebase.functions('us-central1');
+                const functions = firebase.app().functions('us-central1');
                 const activate = functions.httpsCallable('activateApplicationSessionByReferralCode');
                 
                 const result = await activate({ referralCode: code, deviceId: 'web-browser' });
