@@ -253,6 +253,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-functions-compat.js"></script>
 
     <script>
         let db, auth;
@@ -334,7 +335,7 @@
 
                 // Use Cloud Function to validate (same as app does)
                 console.log('Calling activateApplicationSessionByReferralCode Cloud Function...');
-                const functions = firebase.app().functions('us-central1');
+                const functions = firebase.functions();
                 const activate = functions.httpsCallable('activateApplicationSessionByReferralCode');
                 
                 const result = await activate({ referralCode: code, deviceId: 'web-browser' });
