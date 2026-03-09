@@ -298,29 +298,46 @@
                     await auth.signInAnonymously();
                 }
 
-                // Query Firestore for user with matching referral code (case-insensitive)
-                let userDoc = null;
-                let userQuery = await db.collection('applications')
-                    .where('referralCode', '==', referralCode)
-                    .limit(1)
-                    .get();
+                console.log('Searching for referral code:', referralCode);
 
-                if (userQuery.empty) {
-                    // Try searching all documents if index doesn't exist
+                // Try querying with referralCode field
+                let userDoc = null;
+                try {
+                    const userQuery = await db.collection('applications')
+                        .where('referralCode', '==', referralCode)
+                        .limit(1)
+                        .get();
+
+                    if (!userQuery.empty) {
+                        userDoc = userQuery.docs[0];
+                        console.log('Found user with referralCode query');
+                    }
+                } catch (err) {
+                    console.log('referralCode query error (this is normal if index not built):', err.message);
+                }
+
+                // If not found with query, search all documents manually
+                if (!userDoc) {
+                    console.log('Manual search through all applications...');
                     const allApps = await db.collection('applications').get();
+                    console.log('Total applications in database:', allApps.docs.length);
+                    
                     for (const doc of allApps.docs) {
-                        const code = doc.data().referralCode;
+                        const data = doc.data();
+                        const code = data.referralCode;
+                        console.log('Checking app:', data.name, 'Code:', code);
+                        
                         if (code && code.toUpperCase() === referralCode) {
                             userDoc = doc;
+                            console.log('Found matching referral code!');
                             break;
                         }
                     }
-                } else {
-                    userDoc = userQuery.docs[0];
                 }
 
                 if (!userDoc) {
-                    showError('Invalid referral code. Please check and try again.');
+                    console.log('No user found with referral code:', referralCode);
+                    showError('Referral code not found. Please check and try again.');
                     document.getElementById('buttonText').style.display = 'block';
                     document.getElementById('loading').style.display = 'none';
                     document.querySelector('.login-btn-submit').disabled = false;
@@ -328,10 +345,12 @@
                 }
 
                 const userData = userDoc.data();
+                console.log('User data:', userData);
                 
                 // Check if application is approved
                 if (userData.status !== 'approved') {
-                    showError('Your application is still under review (' + userData.status + '). Please check your email for updates.');
+                    console.log('User status:', userData.status);
+                    showError('Your application is still under review (' + userData.status + '). You will get an approval email when ready.');
                     document.getElementById('buttonText').style.display = 'block';
                     document.getElementById('loading').style.display = 'none';
                     document.querySelector('.login-btn-submit').disabled = false;
@@ -345,13 +364,16 @@
                 sessionStorage.setItem('userId', userDoc.id);
                 sessionStorage.setItem('userData', JSON.stringify(userData));
 
+                console.log('Login successful, redirecting to profile...');
                 showSuccess('Login successful! Redirecting...');
                 setTimeout(() => {
                     window.location.href = 'profile.html';
                 }, 1500);
 
             } catch (error) {
-                console.error('Login error:', error);
+                console.error('Full login error:', error);
+                console.error('Error message:', error.message);
+                console.error('Error code:', error.code);
                 showError('Error: ' + error.message);
                 document.getElementById('buttonText').style.display = 'block';
                 document.getElementById('loading').style.display = 'none';
