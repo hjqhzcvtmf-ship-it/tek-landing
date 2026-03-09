@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TEK - Buy Tickets</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@700&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            background: linear-gradient(120deg, rgba(0,255,100,0.18) 0%, rgba(0,255,41,0.22) 100%);
+            mix-blend-mode: color;
+            z-index: 1;
+        }
+
+        * {
+            position: relative;
+            z-index: 2;
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: url('eye.png') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+            color: #e6e6c7;
+            font-family: 'Montserrat', 'Share Tech Mono', 'Orbitron', Arial, sans-serif;
+            padding: 0;
+        }
+
+        header {
+            background: rgba(0, 0, 0, 0.7);
+            border-bottom: 1.5px solid #ffe9a7;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: 'Orbitron', 'Share Tech Mono', monospace;
+            font-size: 1.8em;
+            letter-spacing: 0.2em;
+            color: #ffe9a7;
+        }
+
+        .user-info {
+            text-align: right;
+            font-size: 0.9em;
+        }
+
+        .user-name {
+            color: #ffe9a7;
+            font-weight: bold;
+        }
+
+        .logout-btn {
+            padding: 8px 16px;
+            border: 1.5px solid #ffe9a7;
+            background: transparent;
+            color: #ffe9a7;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            font-family: 'Orbitron', 'Share Tech Mono', monospace;
+            margin-top: 10px;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 233, 167, 0.1);
+            box-shadow: 0 0 10px #ffe9a7;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        h1 {
+            text-align: center;
+            font-family: 'Orbitron', 'Share Tech Mono', monospace;
+            font-size: 2.2em;
+            margin-bottom: 40px;
+            color: #ffe9a7;
+            text-shadow: 0 0 8px #ffe9a7;
+            letter-spacing: 0.1em;
+        }
+
+        .tickets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .ticket-card {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1.5px solid #ffe9a7;
+            border-radius: 8px;
+            padding: 24px;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(255, 233, 167, 0.1);
+        }
+
+        .ticket-card:hover {
+            background: rgba(0, 0, 0, 0.8);
+            box-shadow: 0 0 25px rgba(255, 233, 167, 0.3);
+            transform: translateY(-5px);
+        }
+
+        .ticket-name {
+            font-family: 'Orbitron', 'Share Tech Mono', monospace;
+            font-size: 1.4em;
+            color: #ffe9a7;
+            margin-bottom: 12px;
+            letter-spacing: 0.05em;
+        }
+
+        .ticket-description {
+            font-size: 0.9em;
+            color: #a6a67f;
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+
+        .ticket-price {
+            font-size: 1.8em;
+            color: #00ff41;
+            font-weight: bold;
+            margin-bottom: 20px;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        .buy-btn {
+            width: 100%;
+            padding: 12px;
+            border: 1.5px solid #ffe9a7;
+            background: rgba(0, 0, 0, 0.5);
+            color: #ffe9a7;
+            font-size: 0.9em;
+            font-weight: 700;
+            letter-spacing: 1px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            font-family: 'Orbitron', 'Share Tech Mono', monospace;
+            text-transform: uppercase;
+        }
+
+        .buy-btn:hover {
+            background: #ffe9a7;
+            color: #181818;
+            box-shadow: 0 0 15px #ffe9a7;
+        }
+
+        .coming-soon {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1.5px solid #ffe9a7;
+            border-radius: 8px;
+            color: #a6a67f;
+        }
+
+        .coming-soon h2 {
+            color: #ffe9a7;
+            font-family: 'Orbitron', 'Share Tech Mono', monospace;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            h1 {
+                font-size: 1.6em;
+            }
+
+            .tickets-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">TEK</div>
+        <div class="user-info">
+            <div>Welcome, <span class="user-name" id="userName">Member</span></div>
+            <button onclick="logout()" class="logout-btn">LOG OUT</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <h1>BUY TICKETS</h1>
+
+        <div class="tickets-grid">
+            <div class="ticket-card">
+                <div class="ticket-name">GENERAL ADMISSION</div>
+                <div class="ticket-description">
+                    Access to the main venue<br>
+                    Includes entry to all areas<br>
+                    Valid for one event
+                </div>
+                <div class="ticket-price">$25</div>
+                <button class="buy-btn" onclick="buyTicket('General Admission', 25)">BUY NOW</button>
+            </div>
+
+            <div class="ticket-card">
+                <div class="ticket-name">VIP ACCESS</div>
+                <div class="ticket-description">
+                    Premium seating area<br>
+                    Priority line access<br>
+                    Complimentary drink ticket
+                </div>
+                <div class="ticket-price">$50</div>
+                <button class="buy-btn" onclick="buyTicket('VIP Access', 50)">BUY NOW</button>
+            </div>
+
+            <div class="ticket-card">
+                <div class="ticket-name">EARLY BIRD</div>
+                <div class="ticket-description">
+                    Limited time offer<br>
+                    General admission price<br>
+                    VIP perks included
+                </div>
+                <div class="ticket-price">$35</div>
+                <button class="buy-btn" onclick="buyTicket('Early Bird', 35)">BUY NOW</button>
+            </div>
+        </div>
+
+        <div class="coming-soon">
+            <h2>🎫 Ticket Sales Coming Soon</h2>
+            <p>We're setting up the payment system. Check back soon to purchase your tickets!</p>
+        </div>
+    </div>
+
+    <script>
+        // Check if user is logged in
+        window.addEventListener('load', function() {
+            const userName = sessionStorage.getItem('userName');
+            if (!userName) {
+                // Not logged in, redirect to login
+                window.location.href = 'login.html';
+                return;
+            }
+            document.getElementById('userName').textContent = userName;
+        });
+
+        function logout() {
+            sessionStorage.clear();
+            window.location.href = 'index.html';
+        }
+
+        function buyTicket(ticketName, price) {
+            const userName = sessionStorage.getItem('userName');
+            const email = sessionStorage.getItem('userEmail');
+            
+            // Placeholder for future Stripe integration
+            alert(`Ticket: ${ticketName}\nPrice: $${price}\n\nPayment processing coming soon!\n\nYour email: ${email}`);
+            
+            // TODO: Integrate Stripe here
+            // redirect to stripe checkout or open stripe modal
+        }
+    </script>
+</body>
+</html>

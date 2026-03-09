@@ -81,6 +81,28 @@
       color: #181818;
       box-shadow: 0 0 16px #ffe9a7, 0 0 8px #fff;
     }
+    .login-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      padding: 8px 18px;
+      border: 1.5px solid #ffe9a7;
+      background: transparent;
+      color: #ffe9a7;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: bold;
+      letter-spacing: 1px;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      z-index: 10;
+      font-family: 'Orbitron', 'Share Tech Mono', monospace;
+    }
+    .login-btn:hover {
+      background: rgba(255, 233, 167, 0.1);
+      box-shadow: 0 0 12px #ffe9a7;
+    }
     .logo {
       margin-top: 3em;
       opacity: 0.95;
@@ -93,6 +115,7 @@
   </style>
 </head>
 <body>
+  <a href="login.html" class="login-btn">LOG IN</a>
   <div class="container">
     <h1>You found TEK!</h1>
     <p>Are you ready to<br>be a part of something new?</p>
