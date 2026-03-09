@@ -249,9 +249,10 @@
         </div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js"></script>
+    <!-- Firebase SDK with compat mode for better compatibility -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
     <script>
         let db, auth;
@@ -266,13 +267,20 @@
             appId: "1:501085259012:web:f29d88121166df82563c51"
         };
 
-        firebase.initializeApp(firebaseConfig);
-        db = firebase.firestore();
-        auth = firebase.auth();
+        // Wait for Firebase SDK to be available
+        if (typeof firebase === 'undefined') {
+            console.error('Firebase SDK not loaded');
+        } else {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+            auth = firebase.auth();
+            console.log('Firebase initialized successfully');
+        }
 
-        console.log('Firebase initialized');
+        console.log('Firebase initialized successfully');
 
         function showError(msg) {
+            console.error('Error shown:', msg);
             const errorDiv = document.getElementById('errorMsg');
             errorDiv.textContent = msg;
             errorDiv.style.display = 'block';
@@ -280,6 +288,7 @@
         }
 
         function showSuccess(msg) {
+            console.log('Success shown:', msg);
             const successDiv = document.getElementById('successMsg');
             successDiv.textContent = msg;
             successDiv.style.display = 'block';
@@ -288,6 +297,14 @@
 
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+
+            console.log('Form submitted');
+
+            if (!db || !auth) {
+                console.error('Firebase not initialized');
+                showError('Firebase not ready. Please refresh the page.');
+                return;
+            }
 
             const code = document.getElementById('referralCode').value.trim().toUpperCase();
 
@@ -304,37 +321,46 @@
             document.getElementById('submitBtn').disabled = true;
 
             try {
-                // Sign in anonymously
-                if (!auth.currentUser) {
-                    await auth.signInAnonymously();
+                // Sign in anonymously if needed
+                try {
+                    if (!auth.currentUser) {
+                        console.log('Signing in anonymously...');
+                        await auth.signInAnonymously();
+                        console.log('Anonymous sign-in successful');
+                    }
+                } catch (authErr) {
+                    console.warn('Anonymous sign-in error:', authErr);
                 }
 
                 // Get all applications
+                console.log('Fetching applications...');
                 const snapshot = await db.collection('applications').get();
                 console.log('Found', snapshot.docs.length, 'applications');
 
                 let found = null;
                 for (const doc of snapshot.docs) {
                     const data = doc.data();
+                    console.log('Checking doc:', doc.id, 'with code:', data.referralCode);
                     if (data.referralCode && data.referralCode.toUpperCase() === code) {
                         found = { doc, data };
-                        console.log('Found matching referral code');
+                        console.log('Found matching referral code for:', data.name);
                         break;
                     }
                 }
 
                 if (!found) {
                     console.log('No matching referral code found');
-                    showError('Referral code not found');
+                    showError('Referral code not found or invalid');
                     document.getElementById('buttonText').style.display = 'block';
                     document.getElementById('loading').style.display = 'none';
                     document.getElementById('submitBtn').disabled = false;
                     return;
                 }
 
+                console.log('User status:', found.data.status);
+
                 if (found.data.status !== 'approved') {
-                    console.log('User status:', found.data.status);
-                    showError('Status: ' + found.data.status);
+                    showError('Your application status: ' + found.data.status + '. Waiting for admin approval.');
                     document.getElementById('buttonText').style.display = 'block';
                     document.getElementById('loading').style.display = 'none';
                     document.getElementById('submitBtn').disabled = false;
@@ -342,20 +368,22 @@
                 }
 
                 // Save to session
+                console.log('Saving user data to session...');
                 sessionStorage.setItem('userName', found.data.name || '');
                 sessionStorage.setItem('userEmail', found.data.email || '');
                 sessionStorage.setItem('referralCode', code);
                 sessionStorage.setItem('userId', found.doc.id);
                 sessionStorage.setItem('userData', JSON.stringify(found.data));
 
-                showSuccess('Login successful!');
+                console.log('User data saved, redirecting...');
+                showSuccess('Login successful! Redirecting...');
                 setTimeout(() => {
                     window.location.href = 'profile.html';
                 }, 1000);
 
             } catch (err) {
                 console.error('Login error:', err);
-                showError('Error: ' + err.message);
+                showError('Error: ' + (err.message || err));
                 document.getElementById('buttonText').style.display = 'block';
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('submitBtn').disabled = false;
