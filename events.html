@@ -568,6 +568,9 @@
                     quantity: 1
                 });
 
+                console.log('Full payment intent result:', JSON.stringify(createResult.data, null, 2));
+                console.log('Currency from result:', createResult.data.currency);
+                console.log('Amount:', createResult.data.amount);
                 console.log('Payment intent result:', createResult.data);
 
                 const isFree = createResult.data.free === true;
@@ -610,13 +613,13 @@
                     <div style="background: #1a1a1a; border: 2px solid #ffe9a7; border-radius: 8px; 
                                 padding: 30px; width: 100%; max-width: 500px; color: #e6e6c7;">
                         <h2 style="color: #ffe9a7; margin-top: 0; font-family: Orbitron;">Payment</h2>
-                        <p style="font-size: 0.9em; color: #a6a67f; margin-bottom: 20px;">${eventTitle} - ${ticketType} - $${price}</p>
+                        <p style="font-size: 0.9em; color: #a6a67f; margin-bottom: 20px;">${eventTitle} - ${ticketType} - ${(price * 100).toFixed(0)} kr</p>
                         <div id="payment-element"></div>
                         <div id="payment-message" style="color: #ff6b6b; margin: 15px 0; min-height: 20px;"></div>
                         <button id="payment-submit" 
                                 style="width: 100%; padding: 12px; background: #00ff41; color: #000; border: none; 
                                        border-radius: 4px; font-weight: bold; cursor: pointer; font-family: Orbitron; margin-top: 10px;">
-                            Pay $${price}
+                            Pay ${(price * 100).toFixed(0)} kr
                         </button>
                         <button onclick="cancelPayment()" 
                                 style="width: 100%; padding: 12px; background: transparent; color: #ffe9a7; 
