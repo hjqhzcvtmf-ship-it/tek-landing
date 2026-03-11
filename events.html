@@ -534,6 +534,23 @@
                     throw new Error('User not logged in');
                 }
 
+                // Clear any stale purchase locks for this user
+                try {
+                    const userLocks = await db.collection('users').doc(userId).collection('ticketLocks').get();
+                    for (const lockDoc of userLocks.docs) {
+                        const lockData = lockDoc.data();
+                        const expiresAt = lockData.expiresAt;
+                        const expiresAtMs = expiresAt && typeof expiresAt.toMillis === 'function' ? expiresAt.toMillis() : 0;
+                        // Only clear locks that have expired or are in 'creating' state (failed attempt)
+                        if (expiresAtMs <= Date.now() || lockData.status === 'creating') {
+                            await lockDoc.ref.delete();
+                            console.log('Cleared stale lock for event:', lockDoc.id);
+                        }
+                    }
+                } catch (err) {
+                    console.warn('Could not clear stale locks:', err);
+                }
+
                 // Find event document ID
                 const snapshot = await db.collection('events').get();
                 let eventId = null;
