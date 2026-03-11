@@ -351,55 +351,68 @@
                 console.log('Found', snapshot.docs.length, 'events');
 
                 if (snapshot.docs.length === 0) {
-                    container.innerHTML = '<p style="color: #a6a67f; text-align: center;">No upcoming events at the moment. Check back soon!</p>';
+                    container.innerHTML = '<p style="color: #a6a67f; text-align: center;">No events at the moment. Check back soon!</p>';
                     return;
                 }
 
-                // Sort events by startAt date
+                // Separate events into upcoming and previous
+                const now = new Date();
                 const events = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                events.sort((a, b) => {
+                
+                const upcomingEvents = [];
+                const previousEvents = [];
+
+                events.forEach(event => {
+                    let eventDate = now;
+                    if (event.startAt) {
+                        eventDate = event.startAt.toDate ? event.startAt.toDate() : new Date(event.startAt);
+                    }
+                    
+                    if (eventDate >= now) {
+                        upcomingEvents.push(event);
+                    } else {
+                        previousEvents.push(event);
+                    }
+                });
+
+                // Sort both arrays
+                upcomingEvents.sort((a, b) => {
                     const aDate = a.startAt?.toDate ? a.startAt.toDate() : new Date(a.startAt);
                     const bDate = b.startAt?.toDate ? b.startAt.toDate() : new Date(b.startAt);
                     return aDate - bDate;
                 });
 
+                previousEvents.sort((a, b) => {
+                    const aDate = a.startAt?.toDate ? a.startAt.toDate() : new Date(a.startAt);
+                    const bDate = b.startAt?.toDate ? b.startAt.toDate() : new Date(b.startAt);
+                    return bDate - aDate; // Reverse order for previous
+                });
+
                 container.innerHTML = '';
 
-                events.forEach(event => {
-                    console.log('Event:', event);
+                // Render upcoming events
+                if (upcomingEvents.length > 0) {
+                    const upcomingTitle = document.createElement('h2');
+                    upcomingTitle.style.cssText = 'color: #00ff41; font-family: Orbitron, monospace; margin-bottom: 20px; border-bottom: 2px solid #00ff41; padding-bottom: 10px;';
+                    upcomingTitle.textContent = '📅 UPCOMING';
+                    container.appendChild(upcomingTitle);
 
-                    // Format date
-                    let eventDateStr = 'TBA';
-                    if (event.startAt) {
-                        const eventDate = event.startAt.toDate ? event.startAt.toDate() : new Date(event.startAt);
-                        eventDateStr = eventDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-                    }
+                    upcomingEvents.forEach(event => renderEvent(event, container));
+                }
 
-                    const eventCard = document.createElement('div');
-                    eventCard.className = 'event-card';
-                    eventCard.innerHTML = `
-                        <div class="event-header">
-                            <div class="event-date">${eventDateStr}</div>
-                            <h2 class="event-title">${event.title || 'Untitled Event'}</h2>
-                        </div>
-                        <div class="event-body">
-                            <div class="event-info">
-                                <div class="event-info-label">📍 Location</div>
-                                <div class="event-info-value">${event.location || 'TBA'}</div>
-                            </div>
-                            <div class="event-description">${event.description || 'More details coming soon!'}</div>
-                            <div class="ticket-options">
-                                <button onclick="buyTicket('${event.title || 'Event'}', 'General', ${event.price || 25})" class="ticket-btn">
-                                    GENERAL<br><span class="ticket-price">$${event.price || 25}</span>
-                                </button>
-                                <button onclick="buyTicket('${event.title || 'Event'}', 'VIP', ${event.vipPrice || (event.price ? Math.round(event.price * 1.5) : 40)})" class="ticket-btn">
-                                    VIP<br><span class="ticket-price">$${event.vipPrice || (event.price ? Math.round(event.price * 1.5) : 40)}</span>
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                    container.appendChild(eventCard);
-                });
+                // Render previous events
+                if (previousEvents.length > 0) {
+                    const previousTitle = document.createElement('h2');
+                    previousTitle.style.cssText = 'color: #ffe9a7; font-family: Orbitron, monospace; margin-top: 40px; margin-bottom: 20px; border-bottom: 2px solid #ffe9a7; padding-bottom: 10px;';
+                    previousTitle.textContent = '🏁 PREVIOUS';
+                    container.appendChild(previousTitle);
+
+                    previousEvents.forEach(event => renderEvent(event, container));
+                }
+
+                if (upcomingEvents.length === 0 && previousEvents.length === 0) {
+                    container.innerHTML = '<p style="color: #a6a67f; text-align: center;">No events found.</p>';
+                }
 
             } catch (err) {
                 console.error('Error loading events:', err);
@@ -407,6 +420,42 @@
                 console.error('Full error:', JSON.stringify(err));
                 container.innerHTML = `<p style="color: #ff6b6b; text-align: center;">Error loading events: ${err.message}</p>`;
             }
+        }
+
+        function renderEvent(event, container) {
+            console.log('Event:', event);
+
+            // Format date
+            let eventDateStr = 'TBA';
+            if (event.startAt) {
+                const eventDate = event.startAt.toDate ? event.startAt.toDate() : new Date(event.startAt);
+                eventDateStr = eventDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            }
+
+            const eventCard = document.createElement('div');
+            eventCard.className = 'event-card';
+            eventCard.innerHTML = `
+                <div class="event-header">
+                    <div class="event-date">${eventDateStr}</div>
+                    <h2 class="event-title">${event.title || 'Untitled Event'}</h2>
+                </div>
+                <div class="event-body">
+                    <div class="event-info">
+                        <div class="event-info-label">📍 Location</div>
+                        <div class="event-info-value">${event.location || 'TBA'}</div>
+                    </div>
+                    <div class="event-description">${event.description || 'More details coming soon!'}</div>
+                    <div class="ticket-options">
+                        <button onclick="buyTicket('${event.title || 'Event'}', 'General', ${event.price || 25})" class="ticket-btn">
+                            GENERAL<br><span class="ticket-price">$${event.price || 25}</span>
+                        </button>
+                        <button onclick="buyTicket('${event.title || 'Event'}', 'VIP', ${event.vipPrice || (event.price ? Math.round(event.price * 1.5) : 40)})" class="ticket-btn">
+                            VIP<br><span class="ticket-price">$${event.vipPrice || (event.price ? Math.round(event.price * 1.5) : 40)}</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+            container.appendChild(eventCard);
         }
 
         function buyTicket(eventTitle, ticketType, price) {
