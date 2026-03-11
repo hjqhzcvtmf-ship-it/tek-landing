@@ -659,16 +659,37 @@
                 };
 
                 console.log('Creating Stripe elements with clientSecret:', clientSecret);
-                const elements = stripe.elements({
-                    clientSecret: clientSecret,
-                    appearance: appearance
-                });
-
-                console.log('Elements created, mounting payment element...');
-                const paymentElement = elements.create('payment');
+                let elements, paymentElement;
                 
-                paymentElement.mount('#payment-element');
-                console.log('Payment element mounted successfully');
+                try {
+                    // Create elements - with clientSecret, Stripe knows it's a payment
+                    elements = stripeInstance.elements({
+                        clientSecret: clientSecret,
+                        appearance: appearance
+                    });
+                    console.log('Elements created successfully');
+
+                    // Wait a moment for DOM to be ready
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    
+                    // Check if container exists
+                    const container = document.getElementById('payment-element');
+                    if (!container) {
+                        throw new Error('Payment element container not found in DOM');
+                    }
+                    console.log('Payment container found:', container);
+
+                    paymentElement = elements.create('payment');
+                    console.log('Payment element created');
+                    
+                    paymentElement.mount('#payment-element');
+                    console.log('Payment element mounted successfully');
+
+                } catch (err) {
+                    console.error('Error creating/mounting payment element:', err);
+                    document.getElementById('payment-message').textContent = `Setup error: ${err.message}`;
+                    throw err;
+                }
 
                 // Handle form submission
                 const submitBtn = document.getElementById('payment-submit');
@@ -710,7 +731,7 @@
                         console.error('Payment error:', err);
                         document.getElementById('payment-message').textContent = `Error: ${err.message}`;
                         submitBtn.disabled = false;
-                        submitBtn.textContent = `Pay $${price}`;
+                        submitBtn.textContent = `Pay ${price} kr`;
                     }
                 });
 
