@@ -643,9 +643,6 @@
                 };
 
                 const elements = stripe.elements({
-                    mode: 'payment',
-                    amount: Math.round(price * 100),
-                    currency: 'sek',
                     clientSecret: clientSecret,
                     appearance: appearance
                 });
