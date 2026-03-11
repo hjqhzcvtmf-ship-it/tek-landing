@@ -301,8 +301,8 @@
         </div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyAMMtUtonXEVkPiRmF5SRYw2r97qUQ-yFo",
@@ -316,37 +316,7 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        const sampleEvents = [
-            {
-                title: "TEK LAUNCH PARTY",
-                date: "March 20, 2026",
-                time: "10:00 PM",
-                location: "Downtown Club",
-                description: "Join us for the official TEK community launch celebration! Music, dancing, and exclusive community members only.",
-                generalPrice: 25,
-                vipPrice: 50
-            },
-            {
-                title: "MEMBERS NIGHT",
-                date: "March 27, 2026",
-                time: "9:00 PM",
-                location: "Downtown Club",
-                description: "An exclusive night for all TEK members. Enjoy special pricing on drinks and networking with the community.",
-                generalPrice: 20,
-                vipPrice: 40
-            },
-            {
-                title: "TECHNO NIGHT",
-                date: "April 3, 2026",
-                time: "11:00 PM",
-                location: "Downtown Club",
-                description: "Electronic music festival featuring local and international DJs. Get your dance shoes ready!",
-                generalPrice: 30,
-                vipPrice: 60
-            }
-        ];
-
-        window.addEventListener('load', function() {
+        window.addEventListener('load', async function() {
             const userName = sessionStorage.getItem('userName');
             if (!userName) {
                 window.location.href = 'login.html';
@@ -354,39 +324,69 @@
             }
 
             document.getElementById('userName').textContent = userName;
-            loadEvents();
+            await loadEvents();
         });
 
-        function loadEvents() {
+        async function loadEvents() {
             const container = document.getElementById('eventsContainer');
-            container.innerHTML = '';
+            container.innerHTML = '<p style="color: #ffe9a7; text-align: center;">Loading events...</p>';
 
-            sampleEvents.forEach(event => {
-                const eventCard = document.createElement('div');
-                eventCard.className = 'event-card';
-                eventCard.innerHTML = `
-                    <div class="event-header">
-                        <div class="event-date">${event.date} • ${event.time}</div>
-                        <h2 class="event-title">${event.title}</h2>
-                    </div>
-                    <div class="event-body">
-                        <div class="event-info">
-                            <div class="event-info-label">📍 Location</div>
-                            <div class="event-info-value">${event.location}</div>
+            try {
+                console.log('Fetching events from Firestore...');
+                const snapshot = await db.collection('events')
+                    .orderBy('eventDate', 'asc')
+                    .get();
+
+                console.log('Found', snapshot.docs.length, 'events');
+
+                if (snapshot.docs.length === 0) {
+                    container.innerHTML = '<p style="color: #a6a67f; text-align: center;">No upcoming events at the moment. Check back soon!</p>';
+                    return;
+                }
+
+                container.innerHTML = '';
+
+                snapshot.docs.forEach(doc => {
+                    const event = doc.data();
+                    console.log('Event:', event);
+
+                    // Format date
+                    let eventDateStr = 'TBA';
+                    if (event.eventDate) {
+                        const eventDate = event.eventDate.toDate ? event.eventDate.toDate() : new Date(event.eventDate);
+                        eventDateStr = eventDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                    }
+
+                    const eventCard = document.createElement('div');
+                    eventCard.className = 'event-card';
+                    eventCard.innerHTML = `
+                        <div class="event-header">
+                            <div class="event-date">${eventDateStr}${event.eventTime ? ' • ' + event.eventTime : ''}</div>
+                            <h2 class="event-title">${event.eventName || 'Untitled Event'}</h2>
                         </div>
-                        <div class="event-description">${event.description}</div>
-                        <div class="ticket-options">
-                            <button onclick="buyTicket('${event.title}', 'General', ${event.generalPrice})" class="ticket-btn">
-                                GENERAL<br><span class="ticket-price">$${event.generalPrice}</span>
-                            </button>
-                            <button onclick="buyTicket('${event.title}', 'VIP', ${event.vipPrice})" class="ticket-btn">
-                                VIP<br><span class="ticket-price">$${event.vipPrice}</span>
-                            </button>
+                        <div class="event-body">
+                            <div class="event-info">
+                                <div class="event-info-label">📍 Location</div>
+                                <div class="event-info-value">${event.location || 'TBA'}</div>
+                            </div>
+                            <div class="event-description">${event.description || 'More details coming soon!'}</div>
+                            <div class="ticket-options">
+                                <button onclick="buyTicket('${event.eventName || 'Event'}', 'General', ${event.ticketPrice || 25})" class="ticket-btn">
+                                    GENERAL<br><span class="ticket-price">$${event.ticketPrice || 25}</span>
+                                </button>
+                                <button onclick="buyTicket('${event.eventName || 'Event'}', 'VIP', ${event.vipPrice || (event.ticketPrice ? event.ticketPrice * 2 : 50)})" class="ticket-btn">
+                                    VIP<br><span class="ticket-price">$${event.vipPrice || (event.ticketPrice ? event.ticketPrice * 2 : 50)}</span>
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                `;
-                container.appendChild(eventCard);
-            });
+                    `;
+                    container.appendChild(eventCard);
+                });
+
+            } catch (err) {
+                console.error('Error loading events:', err);
+                container.innerHTML = '<p style="color: #ff6b6b; text-align: center;">Error loading events. Please try again later.</p>';
+            }
         }
 
         function buyTicket(eventTitle, ticketType, price) {

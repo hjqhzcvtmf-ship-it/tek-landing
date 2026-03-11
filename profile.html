@@ -313,8 +313,8 @@
         </div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyAMMtUtonXEVkPiRmF5SRYw2r97qUQ-yFo",
@@ -328,11 +328,12 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        window.addEventListener('load', function() {
+        window.addEventListener('load', async function() {
             const userData = sessionStorage.getItem('userData');
+            const userId = sessionStorage.getItem('userId');
             const userName = sessionStorage.getItem('userName');
 
-            if (!userData) {
+            if (!userData || !userId) {
                 window.location.href = 'login.html';
                 return;
             }
@@ -340,15 +341,12 @@
             try {
                 const user = JSON.parse(userData);
                 
-                // Update profile
+                // Update header and profile name
                 document.getElementById('userName').textContent = user.name || 'Member';
                 document.getElementById('profileName').textContent = user.name || 'Your Name';
                 document.getElementById('profileEmail').textContent = user.email || 'email@example.com';
                 document.getElementById('profilePhone').textContent = user.phone || '+1 (555) 555-5555';
                 document.getElementById('profileInstagram').textContent = user.instagram || '@username';
-                document.getElementById('profileBio').textContent = user.bio || 'Your bio goes here';
-                document.getElementById('xpPoints').textContent = user.xpPoints || '0';
-                document.getElementById('friendCount').textContent = (user.friends ? user.friends.length : 0);
 
                 // Load profile image if exists
                 if (user.profileImageUrl) {
@@ -359,8 +357,32 @@
                     img.className = 'profile-image';
                     imgContainer.appendChild(img);
                 }
+
+                // Fetch live data from Firestore (xpPoints, friends, updated bio)
+                console.log('Fetching live data for user:', userId);
+                const docSnapshot = await db.collection('applications').doc(userId).get();
+                
+                if (docSnapshot.exists) {
+                    const liveData = docSnapshot.data();
+                    console.log('Live user data:', liveData);
+                    
+                    // Update with live data
+                    document.getElementById('profileBio').textContent = liveData.bio || 'Your bio goes here';
+                    document.getElementById('xpPoints').textContent = liveData.xpPoints || '0';
+                    document.getElementById('friendCount').textContent = (liveData.friends ? liveData.friends.length : 0);
+                } else {
+                    // Fallback to session data if document doesn't exist
+                    document.getElementById('profileBio').textContent = user.bio || 'Your bio goes here';
+                    document.getElementById('xpPoints').textContent = user.xpPoints || '0';
+                    document.getElementById('friendCount').textContent = (user.friends ? user.friends.length : 0);
+                }
             } catch (e) {
-                console.error('Error parsing user data:', e);
+                console.error('Error loading profile:', e);
+                // Fallback to session data on error
+                const user = JSON.parse(sessionStorage.getItem('userData'));
+                document.getElementById('profileBio').textContent = user.bio || 'Your bio goes here';
+                document.getElementById('xpPoints').textContent = user.xpPoints || '0';
+                document.getElementById('friendCount').textContent = (user.friends ? user.friends.length : 0);
             }
         });
 
