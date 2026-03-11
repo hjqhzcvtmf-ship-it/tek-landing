@@ -550,7 +550,7 @@
                 console.log('Found event ID:', eventId);
 
                 // Call Cloud Function to create payment intent
-                const functions = firebase.functions('us-central1');
+                const functions = firebase.app().functions('us-central1');
                 const createIntent = functions.httpsCallable('createEventTicketPaymentIntent');
                 
                 const createResult = await createIntent({
