@@ -334,7 +334,7 @@
             try {
                 console.log('Fetching events from Firestore...');
                 const snapshot = await db.collection('events')
-                    .orderBy('eventDate', 'asc')
+                    .orderBy('startAt', 'asc')
                     .get();
 
                 console.log('Found', snapshot.docs.length, 'events');
@@ -352,8 +352,8 @@
 
                     // Format date
                     let eventDateStr = 'TBA';
-                    if (event.eventDate) {
-                        const eventDate = event.eventDate.toDate ? event.eventDate.toDate() : new Date(event.eventDate);
+                    if (event.startAt) {
+                        const eventDate = event.startAt.toDate ? event.startAt.toDate() : new Date(event.startAt);
                         eventDateStr = eventDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
                     }
 
@@ -361,8 +361,8 @@
                     eventCard.className = 'event-card';
                     eventCard.innerHTML = `
                         <div class="event-header">
-                            <div class="event-date">${eventDateStr}${event.eventTime ? ' • ' + event.eventTime : ''}</div>
-                            <h2 class="event-title">${event.eventName || 'Untitled Event'}</h2>
+                            <div class="event-date">${eventDateStr}</div>
+                            <h2 class="event-title">${event.title || 'Untitled Event'}</h2>
                         </div>
                         <div class="event-body">
                             <div class="event-info">
@@ -371,11 +371,11 @@
                             </div>
                             <div class="event-description">${event.description || 'More details coming soon!'}</div>
                             <div class="ticket-options">
-                                <button onclick="buyTicket('${event.eventName || 'Event'}', 'General', ${event.ticketPrice || 25})" class="ticket-btn">
-                                    GENERAL<br><span class="ticket-price">$${event.ticketPrice || 25}</span>
+                                <button onclick="buyTicket('${event.title || 'Event'}', 'General', ${event.price || 25})" class="ticket-btn">
+                                    GENERAL<br><span class="ticket-price">$${event.price || 25}</span>
                                 </button>
-                                <button onclick="buyTicket('${event.eventName || 'Event'}', 'VIP', ${event.vipPrice || (event.ticketPrice ? event.ticketPrice * 2 : 50)})" class="ticket-btn">
-                                    VIP<br><span class="ticket-price">$${event.vipPrice || (event.ticketPrice ? event.ticketPrice * 2 : 50)}</span>
+                                <button onclick="buyTicket('${event.title || 'Event'}', 'VIP', ${event.vipPrice || (event.price ? Math.round(event.price * 1.5) : 40)})" class="ticket-btn">
+                                    VIP<br><span class="ticket-price">$${event.vipPrice || (event.price ? Math.round(event.price * 1.5) : 40)}</span>
                                 </button>
                             </div>
                         </div>
@@ -385,6 +385,7 @@
 
             } catch (err) {
                 console.error('Error loading events:', err);
+                console.error('Error code:', err.code);
                 container.innerHTML = '<p style="color: #ff6b6b; text-align: center;">Error loading events. Please try again later.</p>';
             }
         }
