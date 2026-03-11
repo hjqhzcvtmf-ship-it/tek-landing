@@ -515,12 +515,25 @@
             container.appendChild(eventCard);
         }
 
-        const stripe = Stripe('pk_test_51SwOqeEt59uC4oruet9mqqN1SV6WJZp7FftkG5el9AUPqn2NfMu6RfwPOcswBChgf7ZMQg71CNTJSa4UuIjNxyPL00Yb2HIRzm');
+        let stripe = null;
+
+        async function initStripe() {
+            if (!stripe) {
+                stripe = Stripe('pk_test_51SwOqeEt59uC4oruet9mqqN1SV6WJZp7FftkG5el9AUPqn2NfMu6RfwPOcswBChgf7ZMQg71CNTJSa4UuIjNxyPL00Yb2HIRzm');
+                console.log('Stripe initialized');
+            }
+            return stripe;
+        }
 
         async function buyTicket(eventTitle, ticketType, price) {
             try {
-                console.log('Starting ticket purchase for:', eventTitle, ticketType, '$' + price);
+                console.log('Starting ticket purchase for:', eventTitle, ticketType, 'kr' + price);
                 
+                // Initialize Stripe if not already done
+                const stripeInstance = await initStripe();
+                if (!stripeInstance) {
+                    throw new Error('Failed to initialize Stripe');
+                }
                 // Show loading
                 const loadingDiv = document.createElement('div');
                 loadingDiv.id = 'paymentLoading';
@@ -666,8 +679,8 @@
                     submitBtn.textContent = 'Processing...';
                     
                     try {
-                        console.log('Starting payment confirmation...');
-                        const result = await stripe.confirmPayment({
+                        console.log('Starting payment confirmation with stripeInstance...');
+                        const result = await stripeInstance.confirmPayment({
                             elements,
                             confirmParams: {
                                 return_url: window.location.href
