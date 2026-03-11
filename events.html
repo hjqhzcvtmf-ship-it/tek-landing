@@ -609,12 +609,10 @@
                     throw new Error('Missing payment information from server');
                 }
 
-                console.log('Got client secret, creating payment element');
-
                 // Remove loading and show payment element
                 document.getElementById('paymentLoading').remove();
 
-                // Create a modal for payment
+                // Create a modal for payment with form wrapper
                 const modal = document.createElement('div');
                 modal.id = 'paymentModal';
                 modal.style.cssText = `
@@ -623,24 +621,24 @@
                     align-items: center; z-index: 1001; padding: 20px;
                 `;
                 modal.innerHTML = `
-                    <div style="background: #1a1a1a; border: 2px solid #ffe9a7; border-radius: 8px; 
+                    <form id="payment-form" style="background: #1a1a1a; border: 2px solid #ffe9a7; border-radius: 8px; 
                                 padding: 30px; width: 100%; max-width: 500px; color: #e6e6c7;">
                         <h2 style="color: #ffe9a7; margin-top: 0; font-family: Orbitron;">Payment</h2>
                         <p style="font-size: 0.9em; color: #a6a67f; margin-bottom: 20px;">${eventTitle} - ${ticketType} - ${price} kr</p>
-                        <div id="payment-element"></div>
-                        <div id="payment-message" style="color: #ff6b6b; margin: 15px 0; min-height: 20px;"></div>
-                        <button id="payment-submit" 
+                        <div id="payment-element" style="margin-bottom: 15px;"></div>
+                        <div id="payment-message" style="color: #ff6b6b; margin: 15px 0; min-height: 20px; font-size: 0.9em;"></div>
+                        <button type="submit" id="payment-submit"
                                 style="width: 100%; padding: 12px; background: #00ff41; color: #000; border: none; 
                                        border-radius: 4px; font-weight: bold; cursor: pointer; font-family: Orbitron; margin-top: 10px;">
                             Pay ${price} kr
                         </button>
-                        <button onclick="cancelPayment()" 
+                        <button type="button" onclick="cancelPayment()" 
                                 style="width: 100%; padding: 12px; background: transparent; color: #ffe9a7; 
                                        border: 1.5px solid #ffe9a7; border-radius: 4px; margin-top: 10px; 
                                        cursor: pointer; font-family: Orbitron;">
                             Cancel
                         </button>
-                    </div>
+                    </form>
                 `;
                 document.body.appendChild(modal);
 
@@ -660,8 +658,7 @@
 
                 console.log('Creating Stripe elements with clientSecret:', clientSecret);
                 
-                // Declare variables outside try block so they're accessible to submit button
-                let elements, paymentElement;
+                let elements;
                 
                 try {
                     // Create elements - with clientSecret, Stripe knows it's a payment
@@ -672,7 +669,7 @@
                     console.log('Elements created successfully');
 
                     // Wait a moment for DOM to be ready
-                    await new Promise(resolve => setTimeout(resolve, 100));
+                    await new Promise(resolve => setTimeout(resolve, 200));
                     
                     // Check if container exists
                     const container = document.getElementById('payment-element');
@@ -681,7 +678,7 @@
                     }
                     console.log('Payment container found:', container);
 
-                    paymentElement = elements.create('payment');
+                    const paymentElement = elements.create('payment');
                     console.log('Payment element created');
                     
                     paymentElement.mount('#payment-element');
@@ -694,15 +691,16 @@
                 }
 
                 // Handle form submission
-                const submitBtn = document.getElementById('payment-submit');
+                const form = document.getElementById('payment-form');
                 
-                submitBtn.addEventListener('click', async (e) => {
+                form.addEventListener('submit', async (e) => {
                     e.preventDefault();
+                    const submitBtn = document.getElementById('payment-submit');
                     submitBtn.disabled = true;
                     submitBtn.textContent = 'Processing...';
                     
                     try {
-                        console.log('Starting payment confirmation with elements:', elements);
+                        console.log('Starting payment confirmation...');
                         const result = await stripeInstance.confirmPayment({
                             elements,
                             confirmParams: {
