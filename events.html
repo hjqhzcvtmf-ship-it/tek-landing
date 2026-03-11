@@ -333,9 +333,7 @@
 
             try {
                 console.log('Fetching events from Firestore...');
-                const snapshot = await db.collection('events')
-                    .orderBy('startAt', 'asc')
-                    .get();
+                const snapshot = await db.collection('events').get();
 
                 console.log('Found', snapshot.docs.length, 'events');
 
@@ -344,10 +342,17 @@
                     return;
                 }
 
+                // Sort events by startAt date
+                const events = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                events.sort((a, b) => {
+                    const aDate = a.startAt?.toDate ? a.startAt.toDate() : new Date(a.startAt);
+                    const bDate = b.startAt?.toDate ? b.startAt.toDate() : new Date(b.startAt);
+                    return aDate - bDate;
+                });
+
                 container.innerHTML = '';
 
-                snapshot.docs.forEach(doc => {
-                    const event = doc.data();
+                events.forEach(event => {
                     console.log('Event:', event);
 
                     // Format date
@@ -386,7 +391,8 @@
             } catch (err) {
                 console.error('Error loading events:', err);
                 console.error('Error code:', err.code);
-                container.innerHTML = '<p style="color: #ff6b6b; text-align: center;">Error loading events. Please try again later.</p>';
+                console.error('Full error:', JSON.stringify(err));
+                container.innerHTML = `<p style="color: #ff6b6b; text-align: center;">Error loading events: ${err.message}</p>`;
             }
         }
 
