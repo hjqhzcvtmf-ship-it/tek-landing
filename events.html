@@ -303,6 +303,7 @@
 
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyAMMtUtonXEVkPiRmF5SRYw2r97qUQ-yFo",
@@ -324,7 +325,19 @@
             }
 
             document.getElementById('userName').textContent = userName;
-            await loadEvents();
+
+            try {
+                // Ensure user is authenticated
+                if (!firebase.auth().currentUser) {
+                    console.log('Signing in anonymously...');
+                    await firebase.auth().signInAnonymously();
+                    console.log('Signed in anonymously');
+                }
+                await loadEvents();
+            } catch (err) {
+                console.error('Auth error:', err);
+                document.getElementById('eventsContainer').innerHTML = `<p style="color: #ff6b6b; text-align: center;">Authentication error: ${err.message}</p>`;
+            }
         });
 
         async function loadEvents() {
