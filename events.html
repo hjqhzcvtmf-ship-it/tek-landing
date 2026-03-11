@@ -516,20 +516,6 @@
         }
 
         const stripe = Stripe('pk_test_51SwOqeEt59uC4oruet9mqqN1SV6WJZp7FftkG5el9AUPqn2NfMu6RfwPOcswBChgf7ZMQg71CNTJSa4UuIjNxyPL00Yb2HIRzm');
-        let elements;
-
-        async function initializeStripe() {
-            const appearance = {
-                theme: 'dark',
-                variables: {
-                    colorPrimary: '#00ff41',
-                    colorBackground: '#1a1a1a',
-                    colorText: '#e6e6c7',
-                    borderRadius: '6px'
-                }
-            };
-            elements = stripe.elements({ appearance });
-        }
 
         async function buyTicket(eventTitle, ticketType, price) {
             try {
@@ -597,17 +583,12 @@
                     throw new Error('Missing payment information from server');
                 }
 
-                console.log('Got client secret, creating card element');
+                console.log('Got client secret, creating payment element');
 
-                // Create card element if not already created
-                if (!elements) {
-                    await initializeStripe();
-                }
-
-                // Remove loading and show payment form
+                // Remove loading and show payment element
                 document.getElementById('paymentLoading').remove();
 
-                // Create a modal for card entry
+                // Create a modal for payment
                 const modal = document.createElement('div');
                 modal.id = 'paymentModal';
                 modal.style.cssText = `
@@ -617,11 +598,12 @@
                 `;
                 modal.innerHTML = `
                     <div style="background: #1a1a1a; border: 2px solid #ffe9a7; border-radius: 8px; 
-                                padding: 30px; width: 90%; max-width: 400px; color: #e6e6c7;">
-                        <h2 style="color: #ffe9a7; margin-top: 0; font-family: Orbitron;">Enter Card Details</h2>
-                        <div id="card-element" style="border: 1px solid #ffe9a7; padding: 10px; border-radius: 4px; margin: 20px 0;"></div>
-                        <div id="card-errors" style="color: #ff6b6b; margin: 10px 0;"></div>
-                        <button onclick="confirmPayment('${clientSecret}', '${paymentIntentId}', '${eventTitle}', '${ticketType}')" 
+                                padding: 30px; width: 90%; max-width: 500px; color: #e6e6c7;">
+                        <h2 style="color: #ffe9a7; margin-top: 0; font-family: Orbitron;">Payment</h2>
+                        <p style="font-size: 0.9em; color: #a6a67f;">${eventTitle} - ${ticketType} - $${price}</p>
+                        <div id="payment-element" style="margin: 20px 0;"></div>
+                        <div id="payment-message" style="color: #ff6b6b; margin: 10px 0;"></div>
+                        <button id="payment-submit" 
                                 style="width: 100%; padding: 12px; background: #00ff41; color: #000; border: none; 
                                        border-radius: 4px; font-weight: bold; cursor: pointer; font-family: Orbitron;">
                             Pay $${price}
@@ -636,18 +618,50 @@
                 `;
                 document.body.appendChild(modal);
 
-                // Mount card element
-                const cardElement = elements.create('card');
-                cardElement.mount('#card-element');
-                window.cardElement = cardElement;
+                // Create elements and payment element
+                const elements = stripe.elements({ clientSecret });
+                const paymentElement = elements.create('payment');
+                paymentElement.mount('#payment-element');
 
-                // Handle card errors
-                cardElement.addEventListener('change', (event) => {
-                    const displayError = document.getElementById('card-errors');
-                    if (event.error) {
-                        displayError.textContent = event.error.message;
-                    } else {
-                        displayError.textContent = '';
+                // Handle form submission
+                const form = document.createElement('form');
+                const submitBtn = document.getElementById('payment-submit');
+                
+                submitBtn.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Processing...';
+                    
+                    try {
+                        const result = await stripe.confirmPayment({
+                            elements,
+                            confirmParams: {
+                                return_url: window.location.href
+                            },
+                            redirect: 'if_required'
+                        });
+
+                        if (result.error) {
+                            throw new Error(result.error.message);
+                        }
+
+                        // Payment successful - finalize
+                        const finalize = functions.httpsCallable('finalizeEventTicketPurchase');
+                        await finalize({
+                            eventId: eventId,
+                            quantity: 1,
+                            free: false,
+                            paymentIntentId: paymentIntentId
+                        });
+
+                        document.getElementById('paymentModal').remove();
+                        alert(`Ticket secured for ${eventTitle}!\n\nYour ${ticketType} ticket is ready. Check your email for details.`);
+
+                    } catch (err) {
+                        console.error('Payment error:', err);
+                        document.getElementById('payment-message').textContent = `Payment failed: ${err.message}`;
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = `Pay $${price}`;
                     }
                 });
 
@@ -665,48 +679,9 @@
             }
         }
 
-        async function confirmPayment(clientSecret, paymentIntentId, eventTitle, ticketType) {
-            try {
-                const paymentData = window.currentPaymentData;
-                
-                // Confirm the payment
-                const result = await stripe.confirmCardPayment(clientSecret, {
-                    payment_method: {
-                        card: window.cardElement,
-                        billing_details: {
-                            name: sessionStorage.getItem('userName') || 'Member'
-                        }
-                    }
-                });
-
-                if (result.error) {
-                    throw new Error(result.error.message);
-                }
-
-                // Payment successful - finalize
-                const functions = firebase.app().functions('us-central1');
-                const finalize = functions.httpsCallable('finalizeEventTicketPurchase');
-                await finalize({
-                    eventId: paymentData.eventId,
-                    quantity: 1,
-                    free: false,
-                    paymentIntentId: paymentIntentId
-                });
-
-                document.getElementById('paymentModal').remove();
-                alert(`Ticket secured for ${eventTitle}!\n\nYour ${ticketType} ticket is ready. Check your email for details.`);
-
-            } catch (err) {
-                console.error('Confirm payment error:', err);
-                const errorDiv = document.getElementById('card-errors');
-                if (errorDiv) errorDiv.textContent = `Payment failed: ${err.message}`;
-            }
-        }
-
         function cancelPayment() {
             const modal = document.getElementById('paymentModal');
             if (modal) modal.remove();
-            if (window.cardElement) window.cardElement.unmount();
         }
 
         function logout() {
