@@ -659,6 +659,8 @@
                 };
 
                 console.log('Creating Stripe elements with clientSecret:', clientSecret);
+                
+                // Declare variables outside try block so they're accessible to submit button
                 let elements, paymentElement;
                 
                 try {
@@ -700,7 +702,7 @@
                     submitBtn.textContent = 'Processing...';
                     
                     try {
-                        console.log('Starting payment confirmation with stripeInstance...');
+                        console.log('Starting payment confirmation with elements:', elements);
                         const result = await stripeInstance.confirmPayment({
                             elements,
                             confirmParams: {
