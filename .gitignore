@@ -1,0 +1,14 @@
+# Local env (never commit — may contain Vercel OIDC tokens, API keys)
+.env.local
+.env*.local
+.env
+
+# Vercel
+.vercel
+
+# macOS
+.DS_Store
+
+# Editor
+.vscode/
+.idea/

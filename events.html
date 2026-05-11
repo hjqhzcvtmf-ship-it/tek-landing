@@ -22,6 +22,7 @@
         * {
             position: relative;
             z-index: 2;
+            box-sizing: border-box;
         }
 
         html, body {
@@ -37,6 +38,7 @@
             color: #e6e6c7;
             font-family: 'Montserrat', 'Share Tech Mono', 'Orbitron', Arial, sans-serif;
             padding: 0;
+            overflow-x: hidden;
         }
 
         .bg-video {
@@ -69,6 +71,7 @@
         nav {
             display: flex;
             gap: 30px;
+            flex-wrap: wrap;
         }
 
         nav a {
@@ -93,6 +96,7 @@
         .user-info {
             text-align: right;
             font-size: 0.9em;
+            max-width: 220px;
         }
 
         .logout-btn {
@@ -139,6 +143,7 @@
             border-bottom: 2px solid #ffe9a7;
             padding-bottom: 15px;
             justify-content: center;
+            flex-wrap: wrap;
         }
 
         .tab-btn {
@@ -220,6 +225,7 @@
             color: #ffe9a7;
             margin: 0;
             letter-spacing: 0.05em;
+            word-break: break-word;
         }
 
         .event-body {
@@ -245,6 +251,7 @@
         .event-info-value {
             font-size: 0.95em;
             color: #e6e6c7;
+            overflow-wrap: anywhere;
         }
 
         .event-description {
@@ -253,6 +260,7 @@
             line-height: 1.5;
             margin-bottom: 20px;
             flex: 1;
+            overflow-wrap: anywhere;
         }
 
         .ticket-options {
@@ -306,25 +314,90 @@
 
         @media (max-width: 768px) {
             header {
-                flex-direction: column;
-                gap: 15px;
+                padding: 18px 20px;
+                flex-wrap: wrap;
+                gap: 16px;
+                align-items: flex-start;
             }
 
             nav {
-                flex-direction: column;
-                gap: 10px;
+                gap: 18px;
+                width: 100%;
+                order: 2;
+            }
+
+            .user-info {
+                order: 3;
+                width: 100%;
+                max-width: none;
+                text-align: left;
+            }
+
+            .container {
+                padding: 24px 16px 40px;
             }
 
             h1 {
                 font-size: 1.6em;
+                margin-bottom: 24px;
+            }
+
+            .tabs {
+                gap: 12px;
+                margin-bottom: 24px;
+                padding-bottom: 12px;
+            }
+
+            .tab-btn {
+                flex: 1 1 140px;
+                width: 100%;
             }
 
             .events-grid {
                 grid-template-columns: 1fr;
+                gap: 20px;
             }
 
             .ticket-options {
                 grid-template-columns: 1fr;
+            }
+
+            .event-header,
+            .event-body {
+                padding: 16px;
+            }
+
+            .coming-soon {
+                display: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            header {
+                padding: 16px;
+            }
+
+            .logo {
+                font-size: 1.25em;
+                letter-spacing: 0.14em;
+            }
+
+            nav a {
+                font-size: 0.82em;
+            }
+
+            .logout-btn {
+                width: 100%;
+                text-align: center;
+            }
+
+            .tab-btn {
+                padding: 12px 16px;
+                font-size: 0.9em;
+            }
+
+            .event-title {
+                font-size: 1.15em;
             }
         }
     </style>
@@ -339,6 +412,7 @@
         <nav>
             <a href="profile.html">PROFILE</a>
             <a href="events.html" class="active">EVENTS</a>
+            <a href="tickets.html">MY TICKETS</a>
         </nav>
         <div class="user-info">
             <div>Welcome, <span id="userName">Member</span></div>
@@ -348,10 +422,11 @@
 
     <div class="container">
         <h1>EVENTS</h1>
+        <div id="checkoutStatus" style="display:none; margin: 0 0 20px; padding: 14px 16px; border-radius: 8px; border: 1.5px solid #ffe9a7; background: rgba(0,0,0,0.72);"></div>
 
         <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('upcoming')">UPCOMING</button>
-            <button class="tab-btn" onclick="switchTab('previous')">PREVIOUS</button>
+            <button class="tab-btn active" onclick="switchTab('upcoming', this)">UPCOMING</button>
+            <button class="tab-btn" onclick="switchTab('previous', this)">PREVIOUS</button>
         </div>
 
         <div id="upcoming" class="tab-content active">
@@ -367,9 +442,9 @@
         </div>
 
         <div class="coming-soon">
-            <h2>Ticket Sales Coming Soon</h2>
-            <p>We're currently setting up the ticketing and payment system. Check back soon to purchase your tickets!</p>
-            <p style="font-size: 0.9em; color: #666;">In the meantime, stay tuned for announcements about our upcoming events.</p>
+            <h2>Tickets Available Online</h2>
+            <p>You can now reserve event tickets directly from this page using secure Stripe Checkout.</p>
+            <p style="font-size: 0.9em; color: #666;">Choose an upcoming event above, tap GET TICKET, and you’ll be redirected to complete payment securely.</p>
         </div>
     </div>
 
@@ -378,12 +453,13 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-functions-compat.js"></script>
     <script src="https://js.stripe.com/v3/"></script>
+    <script src="tek-analytics.js"></script>
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyAMMtUtonXEVkPiRmF5SRYw2r97qUQ-yFo",
             authDomain: "tek-nightclub-app.firebaseapp.com",
             projectId: "tek-nightclub-app",
-            storageBucket: "tek-nightclub-app.appspot.com",
+            storageBucket: "tek-nightclub-app.firebasestorage.app",
             messagingSenderId: "501085259012",
             appId: "1:501085259012:web:f29d88121166df82563c51"
         };
@@ -391,11 +467,92 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
+        function setCheckoutStatus(type, message) {
+            const statusEl = document.getElementById('checkoutStatus');
+            if (!statusEl) return;
+
+            const styles = {
+                success: { border: '#00ff41', text: '#00ff41' },
+                error: { border: '#ff6b6b', text: '#ff9a9a' },
+                info: { border: '#ffe9a7', text: '#ffe9a7' }
+            };
+            const style = styles[type] || styles.info;
+
+            statusEl.style.display = 'block';
+            statusEl.style.borderColor = style.border;
+            statusEl.style.color = style.text;
+            statusEl.textContent = message;
+        }
+
+        function clearCheckoutQueryParams() {
+            const url = new URL(window.location.href);
+            ['checkout', 'session_id', 'event_id'].forEach((key) => url.searchParams.delete(key));
+            window.history.replaceState({}, document.title, url.toString());
+        }
+
+        async function handleCheckoutReturn() {
+            const params = new URLSearchParams(window.location.search);
+            const checkoutState = params.get('checkout');
+            if (!checkoutState) return;
+
+            if (checkoutState === 'cancel') {
+                console.log('Stripe Checkout was canceled by the user');
+                if (window.trackWebsiteEvent) {
+                    window.trackWebsiteEvent('ticket_checkout_canceled', { page: 'events' });
+                }
+                setCheckoutStatus('info', 'Checkout canceled. No charge was made. You can try again anytime.');
+                clearCheckoutQueryParams();
+                return;
+            }
+
+            const sessionId = params.get('session_id');
+            if (!sessionId) {
+                setCheckoutStatus('error', 'Checkout returned without a session reference. Please try again.');
+                clearCheckoutQueryParams();
+                return;
+            }
+
+            try {
+                setCheckoutStatus('info', 'Verifying your payment and ticket...');
+                const functions = firebase.app().functions('us-central1');
+                const getStatus = functions.httpsCallable('getEventTicketCheckoutStatus');
+                const appId = localStorage.getItem('userId');
+                const result = await getStatus({ sessionId, appId });
+                const data = result.data || {};
+                console.log('Stripe Checkout return status:', data);
+
+                if (data.status === 'paid') {
+                    if (window.trackWebsiteEvent) {
+                        window.trackWebsiteEvent('ticket_checkout_paid', { page: 'events' });
+                    }
+                    setCheckoutStatus(
+                        'success',
+                        data.ticketReady
+                            ? 'Payment confirmed. Your ticket is ready and should appear in your account shortly.'
+                            : 'Payment confirmed. We are finishing your ticket now; refresh in a moment if it does not appear.'
+                    );
+                } else if (data.status === 'expired') {
+                    setCheckoutStatus('error', 'This checkout session expired before payment completed. Please try again.');
+                } else {
+                    setCheckoutStatus('error', `Checkout status: ${data.status || 'unknown'} (${data.paymentStatus || 'no payment status'}).`);
+                }
+            } catch (err) {
+                console.error('Checkout status verification failed:', err);
+                setCheckoutStatus('error', `We couldn't verify the checkout result automatically. If you were charged, your ticket should appear on the My Tickets page shortly. You can also try refreshing.`);
+            } finally {
+                clearCheckoutQueryParams();
+            }
+        }
+
         window.addEventListener('load', async function() {
-            const userName = sessionStorage.getItem('userName');
+            const userName = localStorage.getItem('userName');
             if (!userName) {
                 window.location.href = 'login.html';
                 return;
+            }
+
+            if (window.trackWebsiteEvent) {
+                window.trackWebsiteEvent('page_view', { page: 'events' });
             }
 
             document.getElementById('userName').textContent = userName;
@@ -407,6 +564,7 @@
                     await firebase.auth().signInAnonymously();
                     console.log('Signed in anonymously');
                 }
+                await handleCheckoutReturn();
                 await loadEvents();
             } catch (err) {
                 console.error('Auth error:', err);
@@ -414,14 +572,16 @@
             }
         });
 
-        function switchTab(tab) {
+        function switchTab(tab, buttonEl) {
             // Hide all tabs
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
             
             // Show selected tab
             document.getElementById(tab).classList.add('active');
-            event.target.classList.add('active');
+            if (buttonEl) {
+                buttonEl.classList.add('active');
+            }
         }
 
         async function loadEvents() {
@@ -504,6 +664,12 @@
                 eventDateStr = eventDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
             }
 
+            const eventPrice = Number(event.price || 0);
+            const currency = (event.currency || 'sek').toString().toUpperCase();
+            const priceLabel = eventPrice <= 0
+                ? 'FREE'
+                : `${Number.isInteger(eventPrice) ? eventPrice : eventPrice.toFixed(2)} ${currency}`;
+
             const eventCard = document.createElement('div');
             eventCard.className = 'event-card';
             eventCard.innerHTML = `
@@ -518,11 +684,8 @@
                     </div>
                     <div class="event-description">${event.description || 'More details coming soon!'}</div>
                     <div class="ticket-options">
-                        <button onclick="buyTicket('${event.title || 'Event'}', 'General', ${event.price || 25})" class="ticket-btn">
-                            GENERAL<br><span class="ticket-price">$${event.price || 25}</span>
-                        </button>
-                        <button onclick="buyTicket('${event.title || 'Event'}', 'VIP', ${event.vipPrice || (event.price ? Math.round(event.price * 1.5) : 40)})" class="ticket-btn">
-                            VIP<br><span class="ticket-price">$${event.vipPrice || (event.price ? Math.round(event.price * 1.5) : 40)}</span>
+                        <button onclick="buyTicket('${event.title || 'Event'}', ${eventPrice})" class="ticket-btn">
+                            GET TICKET<br><span class="ticket-price">${priceLabel}</span>
                         </button>
                     </div>
                 </div>
@@ -534,15 +697,16 @@
 
         async function initStripe() {
             if (!stripe) {
-                stripe = Stripe('pk_test_51SwOqeEt59uC4oruet9mqqN1SV6WJZp7FftkG5el9AUPqn2NfMu6RfwPOcswBChgf7ZMQg71CNTJSa4UuIjNxyPL00Yb2HIRzm');
+                stripe = Stripe('pk_live_51SwOqDImSVvLBf0s0gSYsHitOvEJekzTqqBKCMQFkxsr50VFIf2IF7bcPuzfFSE3ohAg4IOqmWAInaD6yIRe2ahS00GCdLj6oP');
                 console.log('Stripe initialized');
             }
             return stripe;
         }
 
-        async function buyTicket(eventTitle, ticketType, price) {
+        async function buyTicket(eventTitle, price) {
             try {
-                console.log('Starting ticket purchase for:', eventTitle, ticketType, 'kr' + price);
+            console.log('Starting ticket purchase for:', eventTitle, 'price', price);
+                setCheckoutStatus('info', `Preparing secure checkout for ${eventTitle}...`);
                 
                 // Initialize Stripe if not already done
                 const stripeInstance = await initStripe();
@@ -557,7 +721,7 @@
                 document.body.appendChild(loadingDiv);
 
                 // Get current user info
-                const userId = sessionStorage.getItem('userId');
+                const userId = localStorage.getItem('userId');
                 if (!userId) {
                     throw new Error('User not logged in');
                 }
@@ -586,20 +750,26 @@
                 }
 
                 console.log('Found event ID:', eventId);
+                if (window.trackWebsiteEvent) {
+                    window.trackWebsiteEvent('ticket_checkout_started', {
+                        page: 'events',
+                        eventId: eventId,
+                        eventTitle: eventTitle
+                    });
+                }
 
                 // Call Cloud Function to create payment intent
                 const functions = firebase.app().functions('us-central1');
-                const createIntent = functions.httpsCallable('createEventTicketPaymentIntent');
+                const createCheckout = functions.httpsCallable('createEventTicketCheckoutSession');
                 
-                const createResult = await createIntent({
+                const createResult = await createCheckout({
                     eventId: eventId,
-                    quantity: 1
+                    quantity: 1,
+                    pageUrl: window.location.href,
+                    appId: userId
                 });
 
-                console.log('Full payment intent result:', JSON.stringify(createResult.data, null, 2));
-                console.log('Currency from result:', createResult.data.currency);
-                console.log('Amount:', createResult.data.amount);
-                console.log('Payment intent result:', createResult.data);
+                console.log('Stripe Checkout session result:', createResult.data);
 
                 const isFree = createResult.data.free === true;
                 
@@ -609,174 +779,56 @@
                     await finalize({
                         eventId: eventId,
                         quantity: 1,
-                        free: true
+                        free: true,
+                        appId: userId
                     });
+                    if (window.trackWebsiteEvent) {
+                        window.trackWebsiteEvent('ticket_free_claimed', { page: 'events', eventId: eventId, eventTitle: eventTitle });
+                    }
                     
                     document.getElementById('paymentLoading').remove();
-                    alert(`Ticket secured for ${eventTitle}!\n\nYour ${ticketType} ticket is ready.`);
+                    alert(`Ticket secured for ${eventTitle}!\n\nYour ticket is ready.`);
                     return;
                 }
 
-                const clientSecret = createResult.data.clientSecret;
-                const paymentIntentId = createResult.data.paymentIntentId;
+                const checkoutUrl = createResult.data.url;
+                const checkoutSessionId = createResult.data.sessionId;
 
-                if (!clientSecret || !paymentIntentId) {
-                    throw new Error('Missing payment information from server');
+                if (!checkoutUrl && !checkoutSessionId) {
+                    throw new Error('Missing Stripe Checkout session information from server');
                 }
 
-                // Remove loading and show payment element
+                setCheckoutStatus('info', 'Redirecting to Stripe Checkout...');
                 document.getElementById('paymentLoading').remove();
 
-                // Create a modal for payment with form wrapper
-                const modal = document.createElement('div');
-                modal.id = 'paymentModal';
-                modal.style.cssText = `
-                    position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-                    background: rgba(0,0,0,0.9); display: flex; justify-content: center; 
-                    align-items: center; z-index: 1001; padding: 20px;
-                `;
-                modal.innerHTML = `
-                    <form id="payment-form" style="background: #1a1a1a; border: 2px solid #ffe9a7; border-radius: 8px; 
-                                padding: 30px; width: 100%; max-width: 500px; color: #e6e6c7;">
-                        <h2 style="color: #ffe9a7; margin-top: 0; font-family: Orbitron;">Payment</h2>
-                        <p style="font-size: 0.9em; color: #a6a67f; margin-bottom: 20px;">${eventTitle} - ${ticketType} - ${price} kr</p>
-                        <div id="payment-element" style="margin-bottom: 15px;"></div>
-                        <div id="payment-message" style="color: #ff6b6b; margin: 15px 0; min-height: 20px; font-size: 0.9em;"></div>
-                        <button type="submit" id="payment-submit"
-                                style="width: 100%; padding: 12px; background: #00ff41; color: #000; border: none; 
-                                       border-radius: 4px; font-weight: bold; cursor: pointer; font-family: Orbitron; margin-top: 10px;">
-                            Pay ${price} kr
-                        </button>
-                        <button type="button" onclick="cancelPayment()" 
-                                style="width: 100%; padding: 12px; background: transparent; color: #ffe9a7; 
-                                       border: 1.5px solid #ffe9a7; border-radius: 4px; margin-top: 10px; 
-                                       cursor: pointer; font-family: Orbitron;">
-                            Cancel
-                        </button>
-                    </form>
-                `;
-                document.body.appendChild(modal);
-
-                // Create elements with dark appearance
-                const appearance = {
-                    theme: 'dark',
-                    variables: {
-                        colorPrimary: '#00ff41',
-                        colorBackground: '#1a1a1a',
-                        colorText: '#e6e6c7',
-                        colorDanger: '#ff6b6b',
-                        fontFamily: 'Montserrat, system-ui, -apple-system, sans-serif',
-                        borderRadius: '4px',
-                        spacingUnit: '8px'
-                    }
-                };
-
-                console.log('Creating Stripe elements with clientSecret:', clientSecret);
-                
-                let elements;
-                
-                try {
-                    // Create elements with just clientSecret (no mode)
-                    elements = stripeInstance.elements({
-                        clientSecret: clientSecret,
-                        appearance: appearance
-                    });
-                    console.log('Elements created successfully');
-
-                    // Wait for DOM
-                    await new Promise(resolve => setTimeout(resolve, 200));
-                    
-                    const container = document.getElementById('payment-element');
-                    if (!container) {
-                        throw new Error('Payment element container not found in DOM');
-                    }
-                    console.log('Payment container found');
-
-                    // Use linkAuthentication element instead of payment element
-                    const linkElement = elements.create('linkAuthentication');
-                    const cardElement = elements.create('card');
-                    
-                    linkElement.mount('#payment-element');
-                    cardElement.mount('#payment-element');
-                    
-                    console.log('Card element mounted successfully');
-
-                } catch (err) {
-                    console.error('Error creating/mounting card element:', err);
-                    document.getElementById('payment-message').textContent = `Setup error: ${err.message}`;
-                    throw err;
+                if (checkoutUrl) {
+                    window.location.assign(checkoutUrl);
+                    return;
                 }
 
-                // Handle form submission
-                const form = document.getElementById('payment-form');
-                
-                form.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    const submitBtn = document.getElementById('payment-submit');
-                    submitBtn.disabled = true;
-                    submitBtn.textContent = 'Processing...';
-                    
-                    try {
-                        console.log('Starting payment confirmation...');
-                        const result = await stripeInstance.confirmCardPayment(clientSecret, {
-                            payment_method: {
-                                type: 'card',
-                                card: elements.getElement('card')
-                            }
-                        });
-
-                        console.log('Payment result:', result);
-                        if (result.error) {
-                            throw new Error(result.error.message);
-                        }
-
-                        if (result.paymentIntent.status === 'succeeded') {
-                            // Payment successful - finalize
-                            console.log('Payment succeeded, finalizing ticket purchase');
-                            const finalize = functions.httpsCallable('finalizeEventTicketPurchase');
-                            await finalize({
-                                eventId: eventId,
-                                quantity: 1,
-                                free: false,
-                                paymentIntentId: paymentIntentId
-                            });
-
-                            document.getElementById('paymentModal').remove();
-                            alert(`Ticket secured for ${eventTitle}!\n\nYour ${ticketType} ticket is ready. Check your email for details.`);
-                        }
-
-                    } catch (err) {
-                        console.error('Payment error:', err);
-                        document.getElementById('payment-message').textContent = `Error: ${err.message}`;
-                        submitBtn.disabled = false;
-                        submitBtn.textContent = `Pay ${price} kr`;
-                    }
+                const redirectResult = await stripeInstance.redirectToCheckout({
+                    sessionId: checkoutSessionId
                 });
-
-                window.currentPaymentData = {
-                    eventId: eventId,
-                    ticketType: ticketType,
-                    eventTitle: eventTitle,
-                    paymentIntentId: paymentIntentId
-                };
+                if (redirectResult.error) {
+                    throw new Error(redirectResult.error.message);
+                }
 
             } catch (err) {
                 console.error('Payment setup error:', err);
                 const loadingDiv = document.getElementById('paymentLoading');
                 if (loadingDiv) loadingDiv.remove();
+                setCheckoutStatus('error', `Payment setup failed: ${err.message}`);
                 alert(`Payment setup failed: ${err.message}`);
             }
         }
 
-        function cancelPayment() {
-            const modal = document.getElementById('paymentModal');
-            if (modal) modal.remove();
-        }
-
         function logout() {
-            sessionStorage.clear();
+            localStorage.clear();
             window.location.href = 'index.html';
         }
     </script>
+
+<!-- Refer a Friend floating button -->
+<script src="refer-friend.js"></script>
 </body>
 </html>

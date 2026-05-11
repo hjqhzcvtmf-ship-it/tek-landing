@@ -115,12 +115,48 @@
   </style>
 </head>
 <body>
-  <a href="login.html" class="login-btn">LOG IN</a>
+  <a href="login.html" class="login-btn" id="loginBtn">LOG IN</a>
   <div class="container">
     <h1>You found TEK!</h1>
     <p>Are you ready to<br>be a part of something new?</p>
-    <a href="membership.html" class="apply-btn">APPLY</a>
+    <a href="membership.html" class="apply-btn" id="primaryCta">APPLY</a>
     <div class="logo">TEK</div>
   </div>
+  <script src="tek-analytics.js"></script>
+  <script>
+    if (window.trackWebsiteEvent) {
+      window.trackWebsiteEvent('page_view', { page: 'home' });
+    }
+
+    if (localStorage.getItem('userId') && localStorage.getItem('userData')) {
+      const loginBtn = document.getElementById('loginBtn');
+      const primaryCta = document.getElementById('primaryCta');
+
+      if (loginBtn) {
+        loginBtn.textContent = 'PROFILE';
+        loginBtn.href = 'profile.html';
+      }
+
+      if (primaryCta) {
+        primaryCta.textContent = 'EVENTS';
+        primaryCta.href = 'events.html';
+      }
+    }
+
+    document.getElementById('loginBtn').addEventListener('click', function () {
+      if (window.trackWebsiteEvent) {
+        window.trackWebsiteEvent('cta_click', { cta: 'login', page: 'home' });
+      }
+    });
+
+    document.getElementById('primaryCta').addEventListener('click', function () {
+      if (window.trackWebsiteEvent) {
+        window.trackWebsiteEvent('cta_click', { cta: 'primary', page: 'home' });
+      }
+    });
+  </script>
+
+<!-- Refer a Friend floating button -->
+<script src="refer-friend.js"></script>
 </body>
 </html>

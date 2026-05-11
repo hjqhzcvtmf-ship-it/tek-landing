@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex,nofollow">
+  <title>TEK Admin Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@700&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'Montserrat', Arial, sans-serif;
+      background: url('eye.png') no-repeat center center fixed;
+      background-size: cover;
+      color: #f4edd1;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.76);
+      z-index: 0;
+    }
+    .shell {
+      position: relative;
+      z-index: 1;
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 28px 18px 60px;
+    }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .brand {
+      font-family: 'Orbitron', monospace;
+      font-size: 1.8rem;
+      letter-spacing: 0.18em;
+      color: #ffe9a7;
+    }
+    .topbar-right {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .status-pill {
+      border: 1px solid #00ff41;
+      color: #00ff41;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      background: rgba(0, 255, 65, 0.08);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 18px;
+    }
+    .card {
+      grid-column: span 12;
+      background: rgba(0, 0, 0, 0.62);
+      border: 1.5px solid rgba(255, 233, 167, 0.45);
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 0 24px rgba(0, 0, 0, 0.2);
+    }
+    .gate-card {
+      max-width: 520px;
+      margin: 10vh auto 0;
+    }
+    .card h2 {
+      margin: 0 0 14px;
+      font-family: 'Orbitron', monospace;
+      font-size: 1rem;
+      letter-spacing: 0.08em;
+      color: #ffe9a7;
+    }
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+    }
+    .summary-item {
+      background: rgba(0, 255, 65, 0.06);
+      border: 1px solid rgba(0, 255, 65, 0.25);
+      border-radius: 12px;
+      padding: 14px;
+    }
+    .summary-item .label {
+      font-size: 0.75rem;
+      color: #9ea08d;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
+    }
+    .summary-item .value {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 1.6rem;
+      color: #00ff41;
+    }
+    .two-col { grid-column: span 6; }
+    .row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .field {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .field label {
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      color: #a7aa97;
+      text-transform: uppercase;
+    }
+    input,
+    select,
+    textarea,
+    button {
+      font-family: inherit;
+      border-radius: 10px;
+      border: 1.5px solid rgba(255, 233, 167, 0.55);
+      background: rgba(0, 0, 0, 0.66);
+      color: #f4edd1;
+      padding: 11px 12px;
+    }
+    input,
+    select,
+    textarea { width: 100%; }
+    textarea {
+      min-height: 170px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+    button {
+      cursor: pointer;
+      font-family: 'Orbitron', monospace;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      transition: 0.2s ease;
+    }
+    button:hover {
+      border-color: #00ff41;
+      color: #00ff41;
+      box-shadow: 0 0 12px rgba(0, 255, 65, 0.22);
+    }
+    .btn-primary {
+      background: rgba(0, 255, 65, 0.14);
+      border-color: #00ff41;
+      color: #00ff41;
+    }
+    button:disabled {
+      cursor: wait;
+      opacity: 0.65;
+      box-shadow: none;
+    }
+    .btn-danger {
+      border-color: #ff6b6b;
+      color: #ff8a8a;
+    }
+    .btn-ghost {
+      background: transparent;
+      color: #ffe9a7;
+    }
+    .alert {
+      display: none;
+      margin-bottom: 14px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      font-size: 0.92rem;
+    }
+    .alert.success {
+      display: block;
+      background: rgba(0, 255, 65, 0.12);
+      color: #00ff41;
+      border: 1px solid rgba(0, 255, 65, 0.35);
+    }
+    .alert.error {
+      display: block;
+      background: rgba(255, 107, 107, 0.12);
+      color: #ff9d9d;
+      border: 1px solid rgba(255, 107, 107, 0.35);
+    }
+    .muted {
+      color: #a7aa97;
+      font-size: 0.9rem;
+    }
+    .apps-list {
+      display: grid;
+      gap: 12px;
+    }
+    .app-item {
+      display: grid;
+      grid-template-columns: 92px 1fr auto;
+      gap: 14px;
+      align-items: start;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 233, 167, 0.22);
+      border-radius: 12px;
+      padding: 14px;
+    }
+    .app-thumb {
+      width: 92px;
+      height: 92px;
+      border-radius: 12px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255, 233, 167, 0.22);
+    }
+    .app-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .app-meta h3 {
+      margin: 0 0 8px;
+      font-size: 1.1rem;
+      color: #ffe9a7;
+    }
+    .app-meta p {
+      margin: 4px 0;
+      font-size: 0.92rem;
+    }
+    .app-actions {
+      display: flex;
+      gap: 8px;
+      flex-direction: column;
+      min-width: 120px;
+    }
+    .analytics-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 10px;
+    }
+    .analytics-item {
+      padding: 12px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 233, 167, 0.18);
+    }
+    .analytics-item strong {
+      display: block;
+      color: #ffe9a7;
+      margin-bottom: 6px;
+    }
+    .small {
+      font-size: 0.82rem;
+      color: #b9bca8;
+    }
+    .email-toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .email-toolbar input {
+      flex: 1 1 260px;
+    }
+    .email-count {
+      color: #a7aa97;
+      font-size: 0.9rem;
+      margin-left: auto;
+    }
+    .email-list {
+      display: grid;
+      gap: 10px;
+      max-height: 520px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    .email-item {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 233, 167, 0.16);
+      background: rgba(255, 255, 255, 0.03);
+    }
+    .email-main {
+      min-width: 0;
+    }
+    .email-name {
+      color: #ffe9a7;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .email-address {
+      font-family: 'Share Tech Mono', monospace;
+      color: #00ff41;
+      word-break: break-all;
+      margin-bottom: 6px;
+    }
+    .email-meta {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      font-size: 0.8rem;
+      color: #a7aa97;
+    }
+    .email-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .user-search-toolbar {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .user-search-toolbar input {
+      flex: 1 1 300px;
+      font-size: 1rem;
+      padding: 13px 16px;
+    }
+    .user-filter-pills {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .filter-pill {
+      padding: 8px 16px;
+      border-radius: 999px;
+      border: 1.5px solid rgba(255, 233, 167, 0.35);
+      background: transparent;
+      color: #a7aa97;
+      font-family: 'Orbitron', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .filter-pill:hover {
+      border-color: #ffe9a7;
+      color: #ffe9a7;
+      box-shadow: none;
+    }
+    .filter-pill.active {
+      background: rgba(0, 255, 65, 0.14);
+      border-color: #00ff41;
+      color: #00ff41;
+    }
+    .user-result-count {
+      color: #a7aa97;
+      font-size: 0.9rem;
+      margin-left: auto;
+      white-space: nowrap;
+    }
+    .user-search-results {
+      display: grid;
+      gap: 12px;
+      max-height: 75vh;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    .user-search-hint {
+      text-align: center;
+      padding: 40px 20px;
+      color: #a7aa97;
+      font-size: 0.95rem;
+    }
+    .hidden {
+      display: none !important;
+    }
+    .tab-bar {
+      display: flex;
+      gap: 0;
+      margin-bottom: 18px;
+      border-bottom: 2px solid rgba(255, 233, 167, 0.22);
+    }
+    .tab-btn {
+      padding: 12px 24px;
+      border: none;
+      border-bottom: 3px solid transparent;
+      background: transparent;
+      color: #a7aa97;
+      font-family: 'Orbitron', monospace;
+      font-size: 0.85rem;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      transition: 0.2s;
+      border-radius: 0;
+    }
+    .tab-btn:hover {
+      color: #ffe9a7;
+      box-shadow: none;
+      border-color: transparent;
+    }
+    .tab-btn.active {
+      color: #00ff41;
+      border-bottom-color: #00ff41;
+    }
+    .stats-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+    }
+    .stats-table th {
+      text-align: left;
+      padding: 10px 12px;
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #9ea08d;
+      border-bottom: 1.5px solid rgba(255, 233, 167, 0.22);
+    }
+    .stats-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(255, 233, 167, 0.1);
+    }
+    .stats-table tr:hover td {
+      background: rgba(0, 255, 65, 0.04);
+    }
+    .stats-table .num {
+      font-family: 'Share Tech Mono', monospace;
+      color: #00ff41;
+    }
+    .sold-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .sold-bar-track {
+      flex: 1;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 4px;
+      overflow: hidden;
+      min-width: 60px;
+    }
+    .sold-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      background: #00ff41;
+      transition: width 0.4s ease;
+    }
+    .sold-bar-fill.warn { background: #ff9d00; }
+    .sold-bar-fill.full { background: #ff4141; }
+    @media (max-width: 980px) {
+      .two-col { grid-column: span 12; }
+      .app-item { grid-template-columns: 1fr; }
+      .app-actions {
+        flex-direction: row;
+        min-width: 0;
+      }
+      .stats-table { font-size: 0.82rem; }
+      .stats-table th, .stats-table td { padding: 8px 6px; }
+      .tab-btn { padding: 10px 14px; font-size: 0.78rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="brand">TEK ADMIN</div>
+      <div class="topbar-right">
+        <div class="status-pill" id="authStatus">Checking access...</div>
+        <button class="btn-ghost hidden" id="signOutBtn">Sign Out</button>
+      </div>
+    </div>
+
+    <div id="alert"></div>
+
+    <div id="loginGate" class="card gate-card hidden">
+      <h2>Admin Login</h2>
+      <p class="muted">Use the same admin email/password you use in the app control. This session is separate from the public website login.</p>
+      <div class="field">
+        <label for="adminEmail">Email</label>
+        <input type="email" id="adminEmail" autocomplete="username" placeholder="Admin email">
+      </div>
+      <div class="field">
+        <label for="adminPassword">Password</label>
+        <input type="password" id="adminPassword" autocomplete="current-password" placeholder="Password">
+      </div>
+      <div class="row">
+        <button class="btn-primary" id="signInBtn">Sign In</button>
+      </div>
+    </div>
+
+    <div id="accessDenied" class="card gate-card hidden">
+      <h2>Access Denied</h2>
+      <p class="muted">This account signed in successfully, but it is not on the TEK admin allowlist. URL access alone is not enough.</p>
+      <div class="row">
+        <button class="btn-ghost" id="deniedBackBtn">Back to Login</button>
+      </div>
+    </div>
+
+    <div id="dashboard" class="hidden">
+      <div class="tab-bar">
+        <button class="tab-btn active" data-tab="tabDashboard">Dashboard</button>
+        <button class="tab-btn" data-tab="tabUsers">Users</button>
+        <button class="tab-btn" data-tab="tabTickets">Ticket Sales</button>
+      </div>
+
+      <div id="tabDashboard" class="grid">
+      <div class="card two-col" id="broadcastCard">
+        <h2>Broadcast Email</h2>
+        <p class="muted" id="broadcastRecipientCount">Loading recipient count...</p>
+        <div class="field">
+          <label for="broadcastFilter">Audience</label>
+          <select id="broadcastFilter">
+            <option value="all">All users</option>
+            <option value="approved">Approved users only</option>
+            <option value="pending">Pending applications only</option>
+            <option value="rejected">Rejected applications only</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="broadcastSubject">Subject</label>
+          <input type="text" id="broadcastSubject" maxlength="120" placeholder="What should members see in their inbox?">
+        </div>
+        <div class="field">
+          <label for="broadcastMessage">Message</label>
+          <textarea id="broadcastMessage" maxlength="4000" placeholder="Write the message you want emailed to all users."></textarea>
+        </div>
+        <div class="row">
+          <input type="email" id="broadcastPreviewEmail" placeholder="Preview email address">
+          <button class="btn-ghost" id="sendBroadcastPreviewBtn">Send Preview</button>
+        </div>
+        <div class="row">
+          <button class="btn-primary" id="sendBroadcastBtn">Send To All Users</button>
+        </div>
+        <p class="small">Preview sends only to the address above. Full sends go to the selected audience via BCC.</p>
+      </div>
+
+      <div class="card" id="summaryCard">
+        <h2>Applicant Summary</h2>
+        <div class="summary-grid" id="summaryGrid"></div>
+      </div>
+
+      <div class="card two-col">
+        <h2>Conversions (Last 7 Days)</h2>
+        <div class="analytics-list" id="analyticsList"></div>
+      </div>
+
+      <div class="card" id="pendingCard">
+        <h2>Pending Applications</h2>
+        <div class="apps-list" id="pendingList"></div>
+      </div>
+
+      <div class="card" id="recentCard">
+        <h2>Recent Activity</h2>
+        <div class="apps-list" id="recentList"></div>
+      </div>
+      </div>
+
+      <div id="tabUsers" class="grid hidden">
+        <div class="card">
+          <h2>User Search</h2>
+          <div class="user-search-toolbar">
+            <input type="search" id="userSearchInput" placeholder="Search by name, email, phone, Instagram, or referral code...">
+            <div class="user-filter-pills">
+              <button class="filter-pill active" data-filter="all">All</button>
+              <button class="filter-pill" data-filter="approved">Approved</button>
+              <button class="filter-pill" data-filter="pending">Pending</button>
+              <button class="filter-pill" data-filter="rejected">Rejected</button>
+            </div>
+            <span class="user-result-count" id="userResultCount">0 users</span>
+          </div>
+          <div class="user-search-results" id="userSearchResults">
+            <div class="user-search-hint">Start typing to search users...</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tabTickets" class="grid hidden">
+        <div class="card">
+          <h2>Ticket Sales Overview</h2>
+          <div class="summary-grid" id="ticketSummaryGrid"></div>
+        </div>
+        <div class="card">
+          <h2>Per-Event Breakdown</h2>
+          <div id="ticketTableWrap" style="overflow-x:auto"></div>
+        </div>
+        <div class="card two-col">
+          <h2>Ticket Buyers</h2>
+          <div class="email-toolbar">
+            <input type="search" id="ticketBuyerSearch" placeholder="Search by name, email, or event...">
+            <select id="ticketBuyerEventFilter" style="background:#111;color:#fff;border:1px solid #333;border-radius:6px;padding:6px 10px;font-size:13px">
+              <option value="all">All Events</option>
+            </select>
+            <span class="email-count" id="ticketBuyerCount">0 buyers</span>
+          </div>
+          <div id="ticketBuyersTableWrap" style="overflow-x:auto;max-height:600px;overflow-y:auto"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-functions-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAMMtUtonXEVkPiRmF5SRYw2r97qUQ-yFo",
+      authDomain: "tek-nightclub-app.firebaseapp.com",
+      projectId: "tek-nightclub-app",
+      storageBucket: "tek-nightclub-app.firebasestorage.app",
+      messagingSenderId: "501085259012",
+      appId: "1:501085259012:web:f29d88121166df82563c51"
+    };
+
+    const adminApp = firebase.initializeApp(firebaseConfig, 'tekAdminApp');
+    const adminAuth = adminApp.auth();
+    const adminFunctions = adminApp.functions('us-central1');
+
+    let accessDenied = false;
+    let cachedEmailDirectory = [];
+    let cachedAllUsers = [];
+
+    function setAlert(message, type) {
+      const alert = document.getElementById('alert');
+      alert.className = 'alert ' + type;
+      alert.textContent = message;
+      alert.style.display = 'block';
+      if (type === 'success') {
+        setTimeout(() => {
+          alert.style.display = 'none';
+        }, 3500);
+      }
+    }
+
+    function setStatus(message) {
+      document.getElementById('authStatus').textContent = message;
+    }
+
+    function showLogin() {
+      document.getElementById('loginGate').classList.remove('hidden');
+      document.getElementById('accessDenied').classList.add('hidden');
+      document.getElementById('dashboard').classList.add('hidden');
+      document.getElementById('signOutBtn').classList.add('hidden');
+      setStatus('Admin login required');
+    }
+
+    function showDenied() {
+      document.getElementById('loginGate').classList.add('hidden');
+      document.getElementById('accessDenied').classList.remove('hidden');
+      document.getElementById('dashboard').classList.add('hidden');
+      document.getElementById('signOutBtn').classList.add('hidden');
+      setStatus('Access denied');
+    }
+
+    function showDashboard() {
+      document.getElementById('loginGate').classList.add('hidden');
+      document.getElementById('accessDenied').classList.add('hidden');
+      document.getElementById('dashboard').classList.remove('hidden');
+      document.getElementById('signOutBtn').classList.remove('hidden');
+      setStatus('Admin access enabled');
+    }
+
+    function formatDate(value) {
+      if (!value) {
+        return '—';
+      }
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) {
+        return '—';
+      }
+      return date.toLocaleString();
+    }
+
+    function escapeHtml(value) {
+      return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function renderSummary(summary) {
+      const items = [
+        ['Total', summary.total],
+        ['Pending', summary.pending],
+        ['Approved', summary.approved],
+        ['Rejected', summary.rejected],
+        ['Today', summary.submittedToday],
+        ['Last 7 Days', summary.submittedLast7Days]
+      ];
+      document.getElementById('summaryGrid').innerHTML = items.map(([label, value]) => `
+        <div class="summary-item">
+          <div class="label">${label}</div>
+          <div class="value">${value || 0}</div>
+        </div>
+      `).join('');
+    }
+
+    function renderAnalytics(analytics) {
+      const entries = Object.entries((analytics && analytics.last7Days) || {});
+      document.getElementById('analyticsList').innerHTML = entries.length
+        ? entries.map(([name, count]) => `
+            <div class="analytics-item">
+              <strong>${escapeHtml(name)}</strong>
+              <span>${count}</span>
+            </div>
+          `).join('')
+        : '<div class="muted">No analytics events yet.</div>';
+    }
+
+    function renderApplicationItem(app, pending) {
+      const image = app.profileImageUrl
+        ? `<img src="${escapeHtml(app.profileImageUrl)}" alt="${escapeHtml(app.name)}">`
+        : '<span class="small">No photo</span>';
+      const actionButtons = pending
+        ? `
+          <button class="btn-primary" onclick="reviewApplication('${app.id}', 'approve')">Approve</button>
+          <button class="btn-danger" onclick="reviewApplication('${app.id}', 'reject')">Reject</button>
+        `
+        : '';
+
+      return `
+        <div class="app-item">
+          <div class="app-thumb">${image}</div>
+          <div class="app-meta">
+            <h3>${escapeHtml(app.name || 'Unnamed')}</h3>
+            <p><strong>Status:</strong> ${escapeHtml(app.status)}</p>
+            <p><strong>Email:</strong> ${escapeHtml(app.email || '—')}</p>
+            <p><strong>Phone:</strong> ${escapeHtml(app.phone || '—')}</p>
+            <p><strong>Instagram:</strong> ${escapeHtml(app.instagram || '—')}</p>
+            <p><strong>Submitted:</strong> ${escapeHtml(formatDate(app.submittedAt))}</p>
+            ${app.referralCode ? `<p><strong>Referral:</strong> ${escapeHtml(app.referralCode)}</p>` : ''}
+            ${app.bio ? `<p><strong>Bio:</strong> ${escapeHtml(app.bio)}</p>` : ''}
+          </div>
+          <div class="app-actions">${actionButtons}</div>
+        </div>
+      `;
+    }
+
+    function renderApplications(pendingApplications, recentApplications) {
+      document.getElementById('pendingList').innerHTML = pendingApplications.length
+        ? pendingApplications.map((app) => renderApplicationItem(app, true)).join('')
+        : '<div class="muted">No pending applications.</div>';
+
+      const recent = recentApplications.slice(0, 10);
+      document.getElementById('recentList').innerHTML = recent.length
+        ? recent.map((app) => renderApplicationItem(app, false)).join('')
+        : '<div class="muted">No recent applications.</div>';
+    }
+
+    function getBroadcastFilterLabel(filterValue) {
+      switch (filterValue) {
+        case 'approved':
+          return 'approved users';
+        case 'pending':
+          return 'pending applications';
+        case 'rejected':
+          return 'rejected applications';
+        default:
+          return 'all users';
+      }
+    }
+
+    function getBroadcastRecipients(filterValue) {
+      const normalizedFilter = typeof filterValue === 'string' ? filterValue : 'all';
+      const matches = cachedEmailDirectory.filter((item) => {
+        const email = typeof item.email === 'string' ? item.email.trim() : '';
+        const status = typeof item.status === 'string' ? item.status.trim().toLowerCase() : '';
+        if (!email || !email.includes('@')) {
+          return false;
+        }
+        if (normalizedFilter === 'all') {
+          return true;
+        }
+        return status === normalizedFilter;
+      });
+
+      const deduped = [];
+      const seen = new Set();
+      matches.forEach((item) => {
+        const email = String(item.email || '').trim().toLowerCase();
+        if (!email || seen.has(email)) {
+          return;
+        }
+        seen.add(email);
+        deduped.push(item);
+      });
+      return deduped;
+    }
+
+    function updateBroadcastRecipientCount() {
+      const filterValue = (document.getElementById('broadcastFilter')?.value || 'all').trim();
+      const recipients = getBroadcastRecipients(filterValue);
+      document.getElementById('broadcastRecipientCount').textContent = recipients.length
+        ? `${recipients.length} unique emails match ${getBroadcastFilterLabel(filterValue)}.`
+        : `Recipient count unavailable for ${getBroadcastFilterLabel(filterValue)}. Server will validate on send.`;
+      return recipients;
+    }
+
+    async function copyTextToClipboard(text, successMessage) {
+      if (!text) {
+        setAlert('Nothing to copy.', 'error');
+        return;
+      }
+      await navigator.clipboard.writeText(text);
+      setAlert(successMessage, 'success');
+    }
+
+    async function validateAdminUser() {
+      const user = adminAuth.currentUser;
+      if (!user) {
+        if (accessDenied) {
+          showDenied();
+        } else {
+          showLogin();
+        }
+        return;
+      }
+
+      await user.getIdToken(true);
+      const result = await adminFunctions.httpsCallable('getAdminStatus')({});
+      const isAdmin = !!(result.data && result.data.isAdmin);
+
+      if (!isAdmin) {
+        accessDenied = true;
+        await adminAuth.signOut();
+        showDenied();
+        return;
+      }
+
+      accessDenied = false;
+      showDashboard();
+      await loadDashboard();
+    }
+
+    function renderUserSearch(items) {
+      cachedAllUsers = Array.isArray(items) ? items.slice() : [];
+      filterAndRenderUsers();
+    }
+
+    function filterAndRenderUsers() {
+      const searchValue = (document.getElementById('userSearchInput').value || '').trim().toLowerCase();
+      const activePill = document.querySelector('.filter-pill.active');
+      const activeFilter = activePill ? activePill.getAttribute('data-filter') : 'all';
+
+      const filtered = cachedAllUsers.filter(function (user) {
+        if (activeFilter !== 'all' && user.status !== activeFilter) return false;
+        if (!searchValue) return true;
+        var haystack = [
+          user.name, user.email, user.phone, user.instagram,
+          user.referralCode, user.inviteCode, user.bio
+        ].join(' ').toLowerCase();
+        return haystack.includes(searchValue);
+      });
+
+      document.getElementById('userResultCount').textContent = filtered.length + ' / ' + cachedAllUsers.length + ' users';
+
+      if (!searchValue && activeFilter === 'all') {
+        document.getElementById('userSearchResults').innerHTML = filtered.map(function (user) {
+          return renderApplicationItem(user, user.status === 'pending');
+        }).join('');
+        return;
+      }
+
+      document.getElementById('userSearchResults').innerHTML = filtered.length
+        ? filtered.map(function (user) {
+            return renderApplicationItem(user, user.status === 'pending');
+          }).join('')
+        : '<div class="muted">No users match this search.</div>';
+    }
+
+    async function loadDashboard() {
+      const result = await adminFunctions.httpsCallable('adminGetDashboardData')({});
+      const data = result.data || {};
+      cachedEmailDirectory = Array.isArray(data.emailDirectory) ? data.emailDirectory.slice() : [];
+      updateBroadcastRecipientCount();
+      renderSummary(data.summary || {});
+      renderAnalytics(data.analytics || {});
+      renderApplications(data.pendingApplications || [], data.recentApplications || []);
+      renderTicketStats(data.ticketStats || {});
+      renderTicketBuyers((data.ticketStats || {}).ticketBuyers || []);
+      renderUserSearch(data.allApplications || []);
+    }
+
+    function renderTicketStats(stats) {
+      const events = stats.events || [];
+      const totalRevenue = stats.totalRevenue || 0;
+      const totalTicketsSold = stats.totalTicketsSold || 0;
+      const totalEvents = stats.totalEvents || 0;
+      const totalCapacity = events.reduce((s, e) => s + (e.capacity || 0), 0);
+
+      // Summary cards
+      const currency = events.length ? events[0].currency : 'SEK';
+      const summaryItems = [
+        ['Events', totalEvents],
+        ['Tickets Sold', totalTicketsSold],
+        ['Total Capacity', totalCapacity || '∞'],
+        ['Total Revenue', totalRevenue.toLocaleString() + ' ' + currency],
+      ];
+      document.getElementById('ticketSummaryGrid').innerHTML = summaryItems.map(([label, value]) => `
+        <div class="summary-item">
+          <div class="label">${label}</div>
+          <div class="value">${value}</div>
+        </div>
+      `).join('');
+
+      // Per-event table
+      if (!events.length) {
+        document.getElementById('ticketTableWrap').innerHTML = '<p class="muted">No events found.</p>';
+        return;
+      }
+
+      const rows = events.map(ev => {
+        const pct = ev.capacity > 0 ? Math.min(100, Math.round((ev.sold / ev.capacity) * 100)) : 0;
+        const barClass = pct >= 100 ? 'full' : pct >= 75 ? 'warn' : '';
+        const capacityText = ev.capacity > 0 ? ev.capacity : '∞';
+        const soldOfCap = ev.capacity > 0 ? ev.sold + ' / ' + ev.capacity : ev.sold;
+        const dateStr = ev.eventDate ? new Date(ev.eventDate).toLocaleDateString() : '—';
+        return `
+          <tr>
+            <td>${escapeHtml(ev.title)}</td>
+            <td>${dateStr}</td>
+            <td>
+              <div class="sold-bar">
+                <span class="num">${soldOfCap}</span>
+                ${ev.capacity > 0 ? `
+                <div class="sold-bar-track">
+                  <div class="sold-bar-fill ${barClass}" style="width:${pct}%"></div>
+                </div>
+                <span class="small">${pct}%</span>` : ''}
+              </div>
+            </td>
+            <td class="num">${ev.price} ${ev.currency}</td>
+            <td class="num">${ev.revenue.toLocaleString()} ${ev.currency}</td>
+          </tr>
+        `;
+      }).join('');
+
+      document.getElementById('ticketTableWrap').innerHTML = `
+        <table class="stats-table">
+          <thead>
+            <tr>
+              <th>Event</th>
+              <th>Date</th>
+              <th>Sold</th>
+              <th>Price</th>
+              <th>Revenue</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+    }
+
+    let cachedTicketBuyers = [];
+    function renderTicketBuyers(buyers) {
+      cachedTicketBuyers = Array.isArray(buyers) ? buyers.slice() : [];
+
+      // Populate event filter dropdown
+      const eventFilter = document.getElementById('ticketBuyerEventFilter');
+      const events = [...new Set(cachedTicketBuyers.map(b => b.eventTitle))];
+      const currentVal = eventFilter.value;
+      eventFilter.innerHTML = '<option value="all">All Events</option>' +
+        events.map(e => '<option value="' + escapeHtml(e) + '">' + escapeHtml(e) + '</option>').join('');
+      eventFilter.value = currentVal;
+
+      filterAndRenderBuyers();
+    }
+
+    function filterAndRenderBuyers() {
+      const search = (document.getElementById('ticketBuyerSearch').value || '').trim().toLowerCase();
+      const eventVal = document.getElementById('ticketBuyerEventFilter').value;
+
+      const filtered = cachedTicketBuyers.filter(b => {
+        if (eventVal !== 'all' && b.eventTitle !== eventVal) return false;
+        if (!search) return true;
+        return [b.name, b.email, b.eventTitle].join(' ').toLowerCase().includes(search);
+      });
+
+      document.getElementById('ticketBuyerCount').textContent = filtered.length + ' buyer' + (filtered.length !== 1 ? 's' : '');
+
+      if (!filtered.length) {
+        document.getElementById('ticketBuyersTableWrap').innerHTML = '<p class="muted">No ticket buyers found.</p>';
+        return;
+      }
+
+      const rows = filtered.map(b => {
+        const dateStr = b.purchasedAt ? new Date(b.purchasedAt).toLocaleString() : '—';
+        const amountStr = b.amount ? (b.amount / 100).toLocaleString() + ' ' + (b.currency || 'SEK') : '—';
+        return '<tr>' +
+          '<td>' + escapeHtml(b.name || '—') + '</td>' +
+          '<td>' + escapeHtml(b.email || '—') + '</td>' +
+          '<td>' + escapeHtml(b.eventTitle) + '</td>' +
+          '<td class="num">' + b.quantity + '</td>' +
+          '<td class="num">' + amountStr + '</td>' +
+          '<td>' + dateStr + '</td>' +
+          '</tr>';
+      }).join('');
+
+      document.getElementById('ticketBuyersTableWrap').innerHTML =
+        '<table class="stats-table">' +
+        '<thead><tr>' +
+        '<th>Name</th><th>Email</th><th>Event</th><th>Qty</th><th>Amount</th><th>Purchased</th>' +
+        '</tr></thead>' +
+        '<tbody>' + rows + '</tbody></table>';
+    }
+
+    document.getElementById('ticketBuyerSearch').addEventListener('input', filterAndRenderBuyers);
+    document.getElementById('ticketBuyerEventFilter').addEventListener('change', filterAndRenderBuyers);
+
+    // Tab switching
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        const target = this.getAttribute('data-tab');
+        document.getElementById('tabDashboard').classList.add('hidden');
+        document.getElementById('tabUsers').classList.add('hidden');
+        document.getElementById('tabTickets').classList.add('hidden');
+        document.getElementById(target).classList.remove('hidden');
+      });
+    });
+
+    async function signInAdmin() {
+      const email = document.getElementById('adminEmail').value.trim();
+      const password = document.getElementById('adminPassword').value;
+
+      if (!email || !email.includes('@') || !password) {
+        setAlert('Enter admin email and password.', 'error');
+        return;
+      }
+
+      try {
+        setStatus('Signing in...');
+        await adminAuth.setPersistence(firebase.auth.Auth.Persistence.SESSION);
+        await adminAuth.signInWithEmailAndPassword(email, password);
+      } catch (error) {
+        console.error('Admin sign-in failed:', error);
+        const code = error && error.code ? error.code : '';
+        const message = code === 'auth/operation-not-allowed'
+          ? 'Email/password sign-in is disabled in Firebase Authentication.'
+          : (error && error.message ? error.message : 'Admin login failed.');
+        setAlert(message, 'error');
+        setStatus('Admin login required');
+      }
+    }
+
+    async function signOutAdmin() {
+      await adminAuth.signOut();
+      document.getElementById('adminPassword').value = '';
+      accessDenied = false;
+      showLogin();
+    }
+
+    async function reviewApplication(appId, action) {
+      const confirmed = window.confirm(`Are you sure you want to ${action} this application?`);
+      if (!confirmed) {
+        return;
+      }
+      const result = await adminFunctions.httpsCallable('adminReviewApplication')({ appId, action });
+      setAlert(result.data && result.data.message ? result.data.message : 'Application updated.', 'success');
+      await loadDashboard();
+    }
+    window.reviewApplication = reviewApplication;
+
+    let lastBroadcastSentAt = 0;
+    async function sendBroadcastEmail() {
+      const filterInput = document.getElementById('broadcastFilter');
+      const subjectInput = document.getElementById('broadcastSubject');
+      const messageInput = document.getElementById('broadcastMessage');
+      const sendButton = document.getElementById('sendBroadcastBtn');
+      const filterValue = filterInput.value.trim() || 'all';
+      const recipients = updateBroadcastRecipientCount();
+      const subject = subjectInput.value.trim();
+      const message = messageInput.value.trim();
+
+      // Client-side cooldown: prevent re-send within 60 seconds
+      const cooldownMs = 60 * 1000;
+      const timeSinceLast = Date.now() - lastBroadcastSentAt;
+      if (timeSinceLast < cooldownMs) {
+        const secondsLeft = Math.ceil((cooldownMs - timeSinceLast) / 1000);
+        setAlert(`Broadcast already sent. Wait ${secondsLeft}s before sending again.`, 'error');
+        return;
+      }
+
+      if (!subject) {
+        setAlert('Enter an email subject.', 'error');
+        subjectInput.focus();
+        return;
+      }
+      if (!message) {
+        setAlert('Enter a message to send.', 'error');
+        messageInput.focus();
+        return;
+      }
+
+      const recipientText = recipients.length
+        ? `${recipients.length} ${getBroadcastFilterLabel(filterValue)}`
+        : `${getBroadcastFilterLabel(filterValue)}`;
+      const confirmed = window.confirm(`Send this email to ${recipientText}?`);
+      if (!confirmed) {
+        return;
+      }
+
+      sendButton.disabled = true;
+      setStatus('Sending broadcast email...');
+
+      try {
+        const result = await adminFunctions.httpsCallable('adminSendBroadcastEmail')({
+          subject,
+          message,
+          recipientFilter: filterValue,
+        });
+        const sentTo = result && result.data && result.data.sentTo ? result.data.sentTo : 0;
+        const failures = result && result.data && result.data.failures ? result.data.failures : 0;
+        lastBroadcastSentAt = Date.now();
+        const failMsg = failures > 0 ? ` (${failures} failed)` : '';
+        setAlert(`✅ Broadcast email sent to ${sentTo} users successfully!${failMsg}`, 'success');
+        subjectInput.value = '';
+        messageInput.value = '';
+      } catch (error) {
+        console.error('Broadcast email failed:', error);
+        setAlert(error && error.message ? error.message : 'Unable to send broadcast email.', 'error');
+      } finally {
+        sendButton.disabled = false;
+        setStatus(adminAuth.currentUser ? 'Admin access enabled' : 'Admin login required');
+      }
+    }
+
+    async function sendBroadcastPreview() {
+      const filterInput = document.getElementById('broadcastFilter');
+      const previewEmailInput = document.getElementById('broadcastPreviewEmail');
+      const subjectInput = document.getElementById('broadcastSubject');
+      const messageInput = document.getElementById('broadcastMessage');
+      const previewButton = document.getElementById('sendBroadcastPreviewBtn');
+      const previewEmail = previewEmailInput.value.trim();
+      const subject = subjectInput.value.trim();
+      const message = messageInput.value.trim();
+      const filterValue = filterInput.value.trim() || 'all';
+
+      if (!previewEmail || !previewEmail.includes('@')) {
+        setAlert('Enter a valid preview email address.', 'error');
+        previewEmailInput.focus();
+        return;
+      }
+      if (!subject) {
+        setAlert('Enter an email subject before sending a preview.', 'error');
+        subjectInput.focus();
+        return;
+      }
+      if (!message) {
+        setAlert('Enter a message before sending a preview.', 'error');
+        messageInput.focus();
+        return;
+      }
+
+      previewButton.disabled = true;
+      setStatus('Sending preview email...');
+
+      try {
+        const result = await adminFunctions.httpsCallable('adminSendBroadcastEmail')({
+          subject,
+          message,
+          recipientFilter: filterValue,
+          previewOnly: true,
+          previewEmail,
+        });
+        const audienceSize = result && result.data && result.data.audienceSize ? result.data.audienceSize : 0;
+        setAlert(`✅ Preview sent ONLY to ${previewEmail}. (Full send would reach ${audienceSize} ${getBroadcastFilterLabel(filterValue)}.)`, 'success');
+      } catch (error) {
+        console.error('Broadcast preview failed:', error);
+        setAlert(error && error.message ? error.message : 'Unable to send preview email.', 'error');
+      } finally {
+        previewButton.disabled = false;
+        setStatus(adminAuth.currentUser ? 'Admin access enabled' : 'Admin login required');
+      }
+    }
+
+    document.getElementById('signInBtn').addEventListener('click', signInAdmin);
+    document.getElementById('signOutBtn').addEventListener('click', signOutAdmin);
+    document.getElementById('deniedBackBtn').addEventListener('click', function () {
+      accessDenied = false;
+      showLogin();
+    });
+    document.getElementById('sendBroadcastPreviewBtn').addEventListener('click', sendBroadcastPreview);
+    document.getElementById('sendBroadcastBtn').addEventListener('click', sendBroadcastEmail);
+    document.getElementById('broadcastFilter').addEventListener('change', updateBroadcastRecipientCount);
+    document.getElementById('userSearchInput').addEventListener('input', function () {
+      filterAndRenderUsers();
+    });
+    document.querySelectorAll('.filter-pill').forEach(function (pill) {
+      pill.addEventListener('click', function () {
+        document.querySelectorAll('.filter-pill').forEach(function (p) { p.classList.remove('active'); });
+        pill.classList.add('active');
+        filterAndRenderUsers();
+      });
+    });
+    document.getElementById('adminPassword').addEventListener('keydown', function (event) {
+      if (event.key === 'Enter') {
+        signInAdmin();
+      }
+    });
+
+    adminAuth.onAuthStateChanged(async function () {
+      try {
+        await validateAdminUser();
+      } catch (error) {
+        console.error('Admin dashboard error:', error);
+        setStatus('Admin dashboard error');
+        setAlert(error.message || 'Could not load admin dashboard.', 'error');
+        if (!adminAuth.currentUser) {
+          showLogin();
+        }
+      }
+    });
+
+    window.addEventListener('load', async function () {
+      try {
+        await adminAuth.setPersistence(firebase.auth.Auth.Persistence.SESSION);
+        if (!adminAuth.currentUser) {
+          showLogin();
+        }
+      } catch (error) {
+        console.error('Admin auth setup failed:', error);
+        showLogin();
+      }
+    });
+  </script>
+</body>
+</html>

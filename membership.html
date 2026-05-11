@@ -309,6 +309,11 @@
             <p class="tagline">JOIN OUR COMMUNITY</p>
         </div>
 
+        <!-- Invite banner (shown when ?invite= is present) -->
+        <div id="inviteBanner" style="display:none; background:rgba(0,255,65,0.1); border:1px solid rgba(0,255,65,0.4); border-radius:12px; padding:14px 18px; margin-bottom:20px; text-align:center;">
+            <span style="color:#00FF41; font-size:14px; font-weight:600; letter-spacing:0.5px;">You've been invited by a TEK member.</span>
+        </div>
+
         <div class="form-container">
             <h1 class="form-title">APPLY FOR MEMBERSHIP</h1>
 
@@ -319,40 +324,40 @@
                 <div class="image-upload">
                     <div class="upload-area" onclick="document.getElementById('fileInput').click()">
                         <div id="imagePreview">
-                            <div class="upload-icon">📷</div>
+                            <div class="upload-icon">+</div>
                         </div>
                     </div>
-                    <p class="upload-text">TAP TO UPLOAD PROFILE PICTURE</p>
+                    <p class="upload-text">TAP TO UPLOAD PROFILE PICTURE <span style="color:#FF4141">*</span></p>
                     <input type="file" id="fileInput" accept="image/*">
                 </div>
 
                 <!-- Full Name -->
                 <div class="form-group">
-                    <label for="name">Full Name</label>
+                    <label for="name">Full Name <span style="color:#FF4141">*</span></label>
                     <input type="text" id="name" name="name" placeholder="Enter your full name" required>
                 </div>
 
                 <!-- Email -->
                 <div class="form-group">
-                    <label for="email">Email</label>
+                    <label for="email">Email <span style="color:#FF4141">*</span></label>
                     <input type="email" id="email" name="email" placeholder="your.email@example.com" required>
                 </div>
 
                 <!-- Phone -->
                 <div class="form-group">
-                    <label for="phone">Phone Number</label>
+                    <label for="phone">Phone Number <span style="color:#FF4141">*</span></label>
                     <input type="tel" id="phone" name="phone" placeholder="+1 (555) 123-4567" required>
                 </div>
 
                 <!-- Instagram -->
                 <div class="form-group">
-                    <label for="instagram">Instagram Username</label>
+                    <label for="instagram">Instagram Username <span style="color:#FF4141">*</span></label>
                     <input type="text" id="instagram" name="instagram" placeholder="@yourusername" required>
                 </div>
 
                 <!-- Bio -->
                 <div class="form-group">
-                    <label for="bio">Bio</label>
+                    <label for="bio">Bio <span style="color:#FF4141">*</span></label>
                     <textarea id="bio" name="bio" placeholder="Tell us about yourself..." required></textarea>
                 </div>
 
@@ -386,11 +391,12 @@
     </div>
 
     <!-- Firebase Scripts -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-functions.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-functions-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/heic2any/dist/heic2any.min.js"></script>
+    <script src="tek-analytics.js"></script>
 
     <script>
         // Import firebase config from your project
@@ -398,7 +404,7 @@
             apiKey: "AIzaSyAMMtUtonXEVkPiRmF5SRYw2r97qUQ-yFo",
             authDomain: "tek-nightclub-app.firebaseapp.com",
             projectId: "tek-nightclub-app",
-            storageBucket: "tek-nightclub-app.appspot.com",
+            storageBucket: "tek-nightclub-app.firebasestorage.app",
             messagingSenderId: "501085259012",
             appId: "1:501085259012:web:f29d88121166df82563c51",
             measurementId: "G-XXXXXXXXXX"
@@ -407,24 +413,170 @@
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-        const storage = firebase.storage();
-        const functions = firebase.functions('us-central1');
+        const functions = firebase.app().functions('us-central1');
+        const membershipImageUploadUrl = 'https://us-central1-tek-nightclub-app.cloudfunctions.net/uploadMembershipImage';
+
+        if (window.trackWebsiteEvent) {
+            window.trackWebsiteEvent('page_view', { page: 'membership' });
+            window.trackWebsiteEvent('membership_view', { page: 'membership' });
+        }
 
         let selectedImageFile = null;
         let formSubmitting = false;
+
+        // Read invite code from URL parameter (?invite=TEK-XXXXXX)
+        const urlParams = new URLSearchParams(window.location.search);
+        const inviteCode = urlParams.get('invite') || '';
+        if (inviteCode) {
+            console.log('Invite code detected:', inviteCode);
+            const banner = document.getElementById('inviteBanner');
+            if (banner) banner.style.display = 'block';
+        }
 
         // Handle file selection
         document.getElementById('fileInput').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
+                if (!file.type || !file.type.startsWith('image/')) {
+                    showAlert('Please choose a valid image file', 'error');
+                    e.target.value = '';
+                    selectedImageFile = null;
+                    return;
+                }
+
+                if (file.size > 15 * 1024 * 1024) {
+                    showAlert('Image is too large. Please choose one under 15 MB.', 'error');
+                    e.target.value = '';
+                    selectedImageFile = null;
+                    return;
+                }
+
                 selectedImageFile = file;
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    document.getElementById('imagePreview').innerHTML = `<img src="${event.target.result}" alt="Profile preview">`;
-                };
-                reader.readAsDataURL(file);
+                previewSelectedImage(file).catch((previewError) => {
+                    console.warn('Image preview failed:', previewError);
+                    showAlert('Image selected. Preview is not available on this device, but upload can still work.', 'success');
+                });
             }
         });
+
+        function isHeicLike(file) {
+            return /image\/hei(c|f)/i.test(file.type || '') || /\.(heic|heif)$/i.test(file.name || '');
+        }
+
+        function sanitizeFileName(name) {
+            return (name || 'membership-photo.jpg').replace(/[^a-zA-Z0-9._-]/g, '_');
+        }
+
+        async function previewSelectedImage(file) {
+            let previewSource = file;
+            if (isHeicLike(file)) {
+                if (typeof heic2any !== 'function') {
+                    throw new Error('HEIC preview is not supported here');
+                }
+                const converted = await heic2any({
+                    blob: file,
+                    toType: 'image/jpeg',
+                    quality: 0.86,
+                });
+                previewSource = Array.isArray(converted) ? converted[0] : converted;
+            }
+
+            const previewUrl = await fileToDataUrl(previewSource);
+            document.getElementById('imagePreview').innerHTML = `<img src="${previewUrl}" alt="Profile preview">`;
+        }
+
+        async function fileToDataUrl(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = () => reject(new Error('Could not read image file'));
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function resizeImageForUpload(file, maxDimension = 1400, quality = 0.84) {
+            let workingBlob = file;
+            let workingName = file.name || 'membership-photo.jpg';
+
+            if (isHeicLike(file)) {
+                if (typeof heic2any !== 'function') {
+                    throw new Error('HEIC photos are not supported on this device/browser yet');
+                }
+
+                const converted = await heic2any({
+                    blob: file,
+                    toType: 'image/jpeg',
+                    quality,
+                });
+
+                workingBlob = Array.isArray(converted) ? converted[0] : converted;
+                workingName = workingName.replace(/\.(heic|heif)$/i, '.jpg');
+            }
+
+            const sourceDataUrl = await fileToDataUrl(workingBlob);
+
+            return new Promise((resolve, reject) => {
+                const image = new Image();
+                image.onload = () => {
+                    let { width, height } = image;
+                    if (width > maxDimension || height > maxDimension) {
+                        if (width >= height) {
+                            height = Math.round((height * maxDimension) / width);
+                            width = maxDimension;
+                        } else {
+                            width = Math.round((width * maxDimension) / height);
+                            height = maxDimension;
+                        }
+                    }
+
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    const context = canvas.getContext('2d');
+                    if (!context) {
+                        reject(new Error('Could not prepare image upload'));
+                        return;
+                    }
+
+                    context.drawImage(image, 0, 0, width, height);
+                    const outputDataUrl = canvas.toDataURL('image/jpeg', quality);
+                    resolve({
+                        imageData: outputDataUrl,
+                        fileName: sanitizeFileName(workingName.replace(/\.[^.]+$/, '') + '.jpg'),
+                        mimeType: 'image/jpeg',
+                    });
+                };
+                image.onerror = () => reject(new Error('Image format is not supported on this device'));
+                image.src = sourceDataUrl;
+            });
+        }
+
+        async function uploadMembershipImage(file) {
+            let payload;
+            try {
+                payload = await resizeImageForUpload(file);
+            } catch (resizeError) {
+                console.warn('Image resize failed, falling back to original file upload', resizeError);
+                payload = {
+                    imageData: await fileToDataUrl(file),
+                    fileName: file.name || 'membership-photo',
+                    mimeType: file.type || 'image/jpeg',
+                };
+            }
+
+            const response = await fetch(membershipImageUploadUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+
+            const result = await response.json().catch(() => ({}));
+            if (!response.ok || !result.success || !result.url) {
+                throw new Error(result.details || result.error || 'Image upload failed');
+            }
+
+            return result.url;
+        }
 
         // Handle terms checkbox
         document.getElementById('termsAccepted').addEventListener('change', function() {
@@ -486,6 +638,16 @@
                     return;
                 }
 
+                // Validate profile picture is uploaded
+                if (!selectedImageFile) {
+                    showAlert('Please upload a profile picture before submitting', 'error');
+                    submitBtn.disabled = false;
+                    document.getElementById('buttonText').style.display = 'block';
+                    document.getElementById('loading').style.display = 'none';
+                    formSubmitting = false;
+                    return;
+                }
+
                 // Sign in anonymously if needed
                 if (!firebase.auth().currentUser) {
                     await firebase.auth().signInAnonymously();
@@ -525,16 +687,15 @@
                 let profileImageUrl = null;
                 if (selectedImageFile) {
                     try {
-                        const timestamp = Date.now();
-                        const storageRef = storage.ref()
-                            .child('profile_images')
-                            .child(`new_${timestamp}_${formData.email}.jpg`);
-
-                        await storageRef.put(selectedImageFile);
-                        profileImageUrl = await storageRef.getDownloadURL();
+                        profileImageUrl = await uploadMembershipImage(selectedImageFile);
                     } catch (error) {
                         console.error('Image upload error:', error);
-                        // Continue without image
+                        showAlert(`Image upload failed: ${error.message}`, 'error');
+                        submitBtn.disabled = false;
+                        document.getElementById('buttonText').style.display = 'block';
+                        document.getElementById('loading').style.display = 'none';
+                        formSubmitting = false;
+                        return;
                     }
                 }
 
@@ -552,6 +713,11 @@
                     xpPoints: 0,
                 };
 
+                // Store invite code if the applicant came via an invite link
+                if (inviteCode) {
+                    applicationData.invitedByInviteCode = inviteCode;
+                }
+
                 if (profileImageUrl) {
                     applicationData.profileImageUrl = profileImageUrl;
                 }
@@ -567,7 +733,6 @@
                         phone: formData.phone,
                         instagram: formData.instagram,
                         bio: formData.bio,
-                        adminEmail: 'linolyander@icloud.com',
                         ...(profileImageUrl && { profileImageUrl })
                     });
                 } catch (error) {
@@ -577,11 +742,15 @@
 
                 // Success!
                 showAlert('Application submitted! You will receive an email once approved.', 'success');
+                if (window.trackWebsiteEvent) {
+                    window.trackWebsiteEvent('application_submitted', { page: 'membership' });
+                }
                 
                 // Reset form
                 setTimeout(() => {
                     document.getElementById('applicationForm').reset();
-                    document.getElementById('imagePreview').innerHTML = '<div class="upload-icon">📷</div>';
+                    document.getElementById('imagePreview').innerHTML = '<div class="upload-icon">+</div>';
+                    selectedImageFile = null;
                     document.getElementById('termsAccepted').checked = false;
                     submitBtn.disabled = true;
                     document.getElementById('buttonText').style.display = 'block';
@@ -601,5 +770,8 @@
             }
         });
     </script>
+
+<!-- Refer a Friend floating button -->
+<script src="refer-friend.js"></script>
 </body>
 </html>

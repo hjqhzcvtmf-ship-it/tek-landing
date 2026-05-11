@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TEK - Buy Tickets</title>
+    <title>TEK - My Tickets</title>
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@700&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body::before {
@@ -22,6 +22,7 @@
         * {
             position: relative;
             z-index: 2;
+            box-sizing: border-box;
         }
 
         html, body {
@@ -37,6 +38,18 @@
             color: #e6e6c7;
             font-family: 'Montserrat', 'Share Tech Mono', 'Orbitron', Arial, sans-serif;
             padding: 0;
+            overflow-x: hidden;
+        }
+
+        .bg-video {
+            position: fixed !important;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            object-fit: cover;
+            z-index: 0 !important;
+            pointer-events: none;
         }
 
         header {
@@ -55,14 +68,35 @@
             color: #ffe9a7;
         }
 
+        nav {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        nav a {
+            color: #ffe9a7;
+            text-decoration: none;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+            letter-spacing: 0.05em;
+        }
+
+        nav a:hover {
+            color: #00ff41;
+            text-shadow: 0 0 10px #00ff41;
+        }
+
+        nav a.active {
+            color: #00ff41;
+            border-bottom: 2px solid #00ff41;
+            padding-bottom: 5px;
+        }
+
         .user-info {
             text-align: right;
             font-size: 0.9em;
-        }
-
-        .user-name {
-            color: #ffe9a7;
-            font-weight: bold;
+            max-width: 220px;
         }
 
         .logout-btn {
@@ -87,7 +121,7 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1000px;
             margin: 0 auto;
             padding: 40px 20px;
         }
@@ -104,183 +138,423 @@
 
         .tickets-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 30px;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
             margin-bottom: 40px;
         }
 
         .ticket-card {
-            background: rgba(0, 0, 0, 0.6);
-            border: 1.5px solid #ffe9a7;
-            border-radius: 8px;
-            padding: 24px;
-            text-align: center;
+            background: rgba(0, 0, 0, 0.65);
+            border: 1.5px solid #00ff41;
+            border-radius: 12px;
+            overflow: hidden;
             transition: all 0.3s ease;
-            box-shadow: 0 0 15px rgba(255, 233, 167, 0.1);
+            box-shadow: 0 0 18px rgba(0, 255, 65, 0.12);
+            position: relative;
         }
 
         .ticket-card:hover {
-            background: rgba(0, 0, 0, 0.8);
-            box-shadow: 0 0 25px rgba(255, 233, 167, 0.3);
-            transform: translateY(-5px);
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.3);
+            transform: translateY(-3px);
         }
 
-        .ticket-name {
+        .ticket-card.past {
+            border-color: #555;
+            box-shadow: 0 0 10px rgba(100, 100, 100, 0.1);
+            opacity: 0.75;
+        }
+        .ticket-card.past:hover {
+            box-shadow: 0 0 18px rgba(100, 100, 100, 0.25);
+        }
+
+        .ticket-card-header {
+            background: linear-gradient(135deg, rgba(0, 255, 65, 0.15), rgba(255, 233, 167, 0.10));
+            padding: 18px 20px 14px;
+            border-bottom: 1px solid rgba(0, 255, 65, 0.25);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .ticket-event-title {
             font-family: 'Orbitron', 'Share Tech Mono', monospace;
-            font-size: 1.4em;
+            font-size: 1.15em;
             color: #ffe9a7;
-            margin-bottom: 12px;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.04em;
+            word-break: break-word;
+            margin: 0;
         }
 
-        .ticket-description {
-            font-size: 0.9em;
-            color: #a6a67f;
-            margin-bottom: 16px;
-            line-height: 1.5;
-        }
-
-        .ticket-price {
-            font-size: 1.8em;
-            color: #00ff41;
+        .ticket-badge {
+            display: inline-block;
+            background: #00ff41;
+            color: #000;
+            font-family: 'Orbitron', 'Share Tech Mono', monospace;
+            font-size: 0.65em;
             font-weight: bold;
-            margin-bottom: 20px;
-            font-family: 'Share Tech Mono', monospace;
+            letter-spacing: 0.08em;
+            padding: 4px 10px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            white-space: nowrap;
+            margin-left: 12px;
+            flex-shrink: 0;
         }
 
-        .buy-btn {
-            width: 100%;
-            padding: 12px;
-            border: 1.5px solid #ffe9a7;
-            background: rgba(0, 0, 0, 0.5);
-            color: #ffe9a7;
-            font-size: 0.9em;
-            font-weight: 700;
-            letter-spacing: 1px;
+        .ticket-badge.past {
+            background: #555;
+            color: #ccc;
+        }
+
+        .ticket-card-body {
+            padding: 18px 20px 20px;
+        }
+
+        .ticket-detail {
+            display: flex;
+            align-items: baseline;
+            margin-bottom: 10px;
+        }
+
+        .ticket-detail-label {
+            font-size: 0.72em;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            font-weight: bold;
+            min-width: 80px;
+            flex-shrink: 0;
+        }
+
+        .ticket-detail-value {
+            font-size: 0.92em;
+            color: #e6e6c7;
+            word-break: break-word;
+        }
+
+        .ticket-code {
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1px dashed rgba(255, 233, 167, 0.2);
+            text-align: center;
+        }
+
+        .ticket-code-label {
+            font-size: 0.7em;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 4px;
+        }
+
+        .ticket-code-value {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.85em;
+            color: #00ff41;
+            letter-spacing: 0.12em;
+            word-break: break-all;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .empty-state-icon {
+            font-size: 3em;
+            margin-bottom: 16px;
+        }
+
+        .empty-state-text {
+            color: #a6a67f;
+            font-size: 1.1em;
+            margin-bottom: 24px;
+        }
+
+        .empty-state-btn {
+            display: inline-block;
+            padding: 12px 28px;
+            border: 2px solid #00ff41;
+            background: transparent;
+            color: #00ff41;
+            font-family: 'Orbitron', 'Share Tech Mono', monospace;
+            font-size: 0.95em;
+            font-weight: bold;
+            letter-spacing: 0.06em;
             cursor: pointer;
             border-radius: 6px;
+            text-decoration: none;
             transition: all 0.3s ease;
-            font-family: 'Orbitron', 'Share Tech Mono', monospace;
-            text-transform: uppercase;
         }
 
-        .buy-btn:hover {
-            background: #ffe9a7;
-            color: #181818;
-            box-shadow: 0 0 15px #ffe9a7;
+        .empty-state-btn:hover {
+            background: rgba(0, 255, 65, 0.12);
+            box-shadow: 0 0 15px #00ff41;
         }
 
-        .coming-soon {
-            text-align: center;
-            padding: 40px 20px;
-            background: rgba(0, 0, 0, 0.5);
-            border: 1.5px solid #ffe9a7;
-            border-radius: 8px;
-            color: #a6a67f;
-        }
-
-        .coming-soon h2 {
+        .loading-text {
             color: #ffe9a7;
-            font-family: 'Orbitron', 'Share Tech Mono', monospace;
-            margin-bottom: 10px;
+            text-align: center;
+            font-size: 1em;
+            padding: 40px 0;
+        }
+
+        .error-text {
+            color: #ff6b6b;
+            text-align: center;
+            font-size: 0.95em;
+            padding: 20px;
         }
 
         @media (max-width: 768px) {
             header {
-                flex-direction: column;
-                gap: 15px;
+                flex-wrap: wrap;
+                padding: 14px 16px;
+                gap: 8px;
             }
-
-            h1 {
-                font-size: 1.6em;
-            }
-
+            .logo { font-size: 1.3em; }
+            nav { gap: 16px; }
+            nav a { font-size: 0.82em; }
+            h1 { font-size: 1.5em; margin-bottom: 24px; }
             .tickets-grid {
                 grid-template-columns: 1fr;
+                gap: 16px;
             }
+            .ticket-card-header { padding: 14px 16px 12px; }
+            .ticket-card-body { padding: 14px 16px 16px; }
+            .ticket-event-title { font-size: 1em; }
+        }
+
+        @media (max-width: 480px) {
+            header { padding: 10px 12px; }
+            .logo { font-size: 1.1em; }
+            nav { gap: 12px; }
+            nav a { font-size: 0.78em; }
+            h1 { font-size: 1.2em; letter-spacing: 0.04em; }
+            .user-info { font-size: 0.8em; max-width: 140px; }
+            .container { padding: 20px 10px; }
         }
     </style>
 </head>
 <body>
     <header>
         <div class="logo">TEK</div>
+        <nav>
+            <a href="profile.html">PROFILE</a>
+            <a href="events.html">EVENTS</a>
+            <a href="tickets.html" class="active">MY TICKETS</a>
+        </nav>
         <div class="user-info">
-            <div>Welcome, <span class="user-name" id="userName">Member</span></div>
+            <div>Welcome, <span id="userName">Member</span></div>
             <button onclick="logout()" class="logout-btn">LOG OUT</button>
         </div>
     </header>
 
     <div class="container">
-        <h1>BUY TICKETS</h1>
-
-        <div class="tickets-grid">
-            <div class="ticket-card">
-                <div class="ticket-name">GENERAL ADMISSION</div>
-                <div class="ticket-description">
-                    Access to the main venue<br>
-                    Includes entry to all areas<br>
-                    Valid for one event
-                </div>
-                <div class="ticket-price">$25</div>
-                <button class="buy-btn" onclick="buyTicket('General Admission', 25)">BUY NOW</button>
-            </div>
-
-            <div class="ticket-card">
-                <div class="ticket-name">VIP ACCESS</div>
-                <div class="ticket-description">
-                    Premium seating area<br>
-                    Priority line access<br>
-                    Complimentary drink ticket
-                </div>
-                <div class="ticket-price">$50</div>
-                <button class="buy-btn" onclick="buyTicket('VIP Access', 50)">BUY NOW</button>
-            </div>
-
-            <div class="ticket-card">
-                <div class="ticket-name">EARLY BIRD</div>
-                <div class="ticket-description">
-                    Limited time offer<br>
-                    General admission price<br>
-                    VIP perks included
-                </div>
-                <div class="ticket-price">$35</div>
-                <button class="buy-btn" onclick="buyTicket('Early Bird', 35)">BUY NOW</button>
-            </div>
-        </div>
-
-        <div class="coming-soon">
-            <h2>🎫 Ticket Sales Coming Soon</h2>
-            <p>We're setting up the payment system. Check back soon to purchase your tickets!</p>
+        <h1>MY TICKETS</h1>
+        <div id="ticketsContainer">
+            <p class="loading-text">Loading your tickets...</p>
         </div>
     </div>
 
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-functions-compat.js"></script>
+    <script src="tek-analytics.js"></script>
+
     <script>
-        // Check if user is logged in
-        window.addEventListener('load', function() {
-            const userName = sessionStorage.getItem('userName');
+        const firebaseConfig = {
+            apiKey: "AIzaSyAMMtUtonXEVkPiRmF5SRYw2r97qUQ-yFo",
+            authDomain: "tek-nightclub-app.firebaseapp.com",
+            projectId: "tek-nightclub-app",
+            storageBucket: "tek-nightclub-app.firebasestorage.app",
+            messagingSenderId: "501085259012",
+            appId: "1:501085259012:web:f29d88121166df82563c51"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        window.addEventListener('load', async function () {
+            const userName = localStorage.getItem('userName');
             if (!userName) {
-                // Not logged in, redirect to login
                 window.location.href = 'login.html';
                 return;
             }
+
+            if (window.trackWebsiteEvent) {
+                window.trackWebsiteEvent('page_view', { page: 'tickets' });
+            }
+
             document.getElementById('userName').textContent = userName;
+
+            try {
+                if (!firebase.auth().currentUser) {
+                    console.log('Signing in anonymously...');
+                    await firebase.auth().signInAnonymously();
+                    console.log('Signed in anonymously');
+                }
+
+                await loadTickets();
+            } catch (err) {
+                console.error('Auth error:', err);
+                document.getElementById('ticketsContainer').innerHTML =
+                    '<p class="error-text">Authentication error: ' + err.message + '</p>';
+            }
         });
 
-        function logout() {
-            sessionStorage.clear();
-            window.location.href = 'index.html';
+        async function loadTickets() {
+            const container = document.getElementById('ticketsContainer');
+
+            const appId = localStorage.getItem('userId');
+            const sessionId = localStorage.getItem('sessionId');
+
+            if (!appId || !sessionId) {
+                container.innerHTML = '<p class="error-text">Not signed in. Please <a href="login.html" style="color:#00ff41;">log in</a> again.</p>';
+                return;
+            }
+
+            try {
+                console.log('Fetching tickets via getWebTickets for appId:', appId);
+                const functions = firebase.app().functions('us-central1');
+                const getTickets = functions.httpsCallable('getWebTickets');
+                const result = await getTickets({ appId: appId, sessionId: sessionId });
+                const tickets = (result.data && result.data.tickets) || [];
+
+                console.log('Found', tickets.length, 'tickets');
+
+                if (tickets.length === 0) {
+                    container.innerHTML =
+                        '<div class="empty-state">' +
+                            '<div class="empty-state-icon">🎫</div>' +
+                            '<p class="empty-state-text">You don\'t have any tickets yet.</p>' +
+                            '<a href="events.html" class="empty-state-btn">BROWSE EVENTS</a>' +
+                        '</div>';
+                    return;
+                }
+
+                // Sort: upcoming first, then past
+                var now = new Date();
+                tickets.sort(function (a, b) {
+                    var aDate = a.startAt
+                        ? new Date(a.startAt)
+                        : new Date(0);
+                    var bDate = b.startAt
+                        ? new Date(b.startAt)
+                        : new Date(0);
+                    var aUpcoming = aDate >= now ? 0 : 1;
+                    var bUpcoming = bDate >= now ? 0 : 1;
+                    if (aUpcoming !== bUpcoming) return aUpcoming - bUpcoming;
+                    return aDate - bDate;
+                });
+
+                container.innerHTML = '<div class="tickets-grid"></div>';
+                var grid = container.querySelector('.tickets-grid');
+
+                tickets.forEach(function (ticket) {
+                    var card = document.createElement('div');
+                    card.className = 'ticket-card';
+
+                    // Event date
+                    var dateStr = 'TBA';
+                    var isPast = false;
+                    if (ticket.startAt) {
+                        var eventDate = new Date(ticket.startAt);
+                        dateStr = eventDate.toLocaleDateString('en-US', {
+                            weekday: 'short',
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric',
+                        });
+                        var timeStr = eventDate.toLocaleTimeString('en-US', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                        });
+                        dateStr += ' · ' + timeStr;
+                        isPast = eventDate < now;
+                    }
+
+                    if (isPast) card.classList.add('past');
+
+                    // Purchase date
+                    var purchasedStr = '';
+                    if (ticket.purchasedAt) {
+                        var purchDate = new Date(ticket.purchasedAt);
+                        purchasedStr = purchDate.toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric',
+                        });
+                    }
+
+                    // Price
+                    var amount = ticket.amount ? (ticket.amount / 100) : 0;
+                    var currency = (ticket.currency || 'sek').toUpperCase();
+                    var priceStr = amount > 0
+                        ? (Number.isInteger(amount) ? amount : amount.toFixed(2)) + ' ' + currency
+                        : 'FREE';
+
+                    // Ticket code
+                    var ticketCode = ticket.ticketCode || ticket.id || '';
+
+                    card.innerHTML =
+                        '<div class="ticket-card-header">' +
+                            '<h3 class="ticket-event-title">' + (ticket.eventTitle || 'Event') + '</h3>' +
+                            '<span class="ticket-badge' + (isPast ? ' past' : '') + '">' + (isPast ? 'PAST' : 'VALID') + '</span>' +
+                        '</div>' +
+                        '<div class="ticket-card-body">' +
+                            '<div class="ticket-detail">' +
+                                '<span class="ticket-detail-label">DATE</span>' +
+                                '<span class="ticket-detail-value">' + dateStr + '</span>' +
+                            '</div>' +
+                            (ticket.location
+                                ? '<div class="ticket-detail">' +
+                                    '<span class="ticket-detail-label">VENUE</span>' +
+                                    '<span class="ticket-detail-value">' + ticket.location + '</span>' +
+                                  '</div>'
+                                : '') +
+                            '<div class="ticket-detail">' +
+                                '<span class="ticket-detail-label">PRICE</span>' +
+                                '<span class="ticket-detail-value">' + priceStr + '</span>' +
+                            '</div>' +
+                            (purchasedStr
+                                ? '<div class="ticket-detail">' +
+                                    '<span class="ticket-detail-label">BOUGHT</span>' +
+                                    '<span class="ticket-detail-value">' + purchasedStr + '</span>' +
+                                  '</div>'
+                                : '') +
+                            '<div class="ticket-code">' +
+                                '<div class="ticket-code-label">TICKET CODE</div>' +
+                                '<div class="ticket-code-value">' + ticketCode + '</div>' +
+                            '</div>' +
+                        '</div>';
+
+                    grid.appendChild(card);
+                });
+
+            } catch (err) {
+                console.error('Error loading tickets:', err);
+                // If session expired/invalid, redirect to login
+                if (err.code === 'functions/permission-denied' || err.code === 'functions/not-found') {
+                    localStorage.clear();
+                    container.innerHTML =
+                        '<p class="error-text">Your session has expired. <a href="login.html" style="color:#00ff41;">Please log in again.</a></p>';
+                    return;
+                }
+                container.innerHTML =
+                    '<p class="error-text">Error loading tickets: ' + err.message + '</p>';
+            }
         }
 
-        function buyTicket(ticketName, price) {
-            const userName = sessionStorage.getItem('userName');
-            const email = sessionStorage.getItem('userEmail');
-            
-            // Placeholder for future Stripe integration
-            alert(`Ticket: ${ticketName}\nPrice: $${price}\n\nPayment processing coming soon!\n\nYour email: ${email}`);
-            
-            // TODO: Integrate Stripe here
-            // redirect to stripe checkout or open stripe modal
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'index.html';
         }
     </script>
+
+<!-- Refer a Friend floating button -->
+<script src="refer-friend.js"></script>
 </body>
 </html>

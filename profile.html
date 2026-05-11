@@ -117,9 +117,17 @@
             gap: 40px;
             margin-bottom: 50px;
             padding: 30px;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.78);
             border: 1.5px solid #ffe9a7;
             border-radius: 8px;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.5), 0 0 60px rgba(0,0,0,0.3);
+        }
+
+        /* Profile image area */
+        .profile-image-wrapper {
+            position: relative;
+            width: 200px;
+            height: 200px;
         }
 
         .profile-image {
@@ -137,6 +145,79 @@
             justify-content: center;
             font-size: 80px;
             color: #ffe9a7;
+        }
+
+        .image-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 200px;
+            height: 200px;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid #00ff41;
+        }
+
+        .image-overlay:hover {
+            background: rgba(0, 0, 0, 0.75);
+        }
+
+        .image-overlay .overlay-icon {
+            font-size: 40px;
+            margin-bottom: 8px;
+        }
+
+        .image-overlay .overlay-text {
+            font-size: 0.75em;
+            color: #00ff41;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: bold;
+        }
+
+        .editing .image-overlay {
+            display: flex;
+        }
+
+        #imageInput {
+            display: none;
+        }
+
+        .image-uploading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 200px;
+            height: 200px;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .image-uploading.active {
+            display: flex;
+        }
+
+        .image-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(0, 255, 65, 0.2);
+            border-top: 3px solid #00ff41;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         .profile-info h1 {
@@ -171,6 +252,140 @@
             font-style: italic;
         }
 
+        /* Editable fields */
+        .profile-input {
+            display: none;
+            width: 100%;
+            padding: 8px 12px;
+            margin-top: 4px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1.5px solid #ffe9a7;
+            border-radius: 6px;
+            color: #e6e6c7;
+            font-family: 'Montserrat', 'Share Tech Mono', Arial, sans-serif;
+            font-size: 1em;
+            outline: none;
+            transition: border-color 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .profile-input:focus {
+            border-color: #00ff41;
+            box-shadow: 0 0 8px rgba(0, 255, 65, 0.3);
+        }
+
+        textarea.profile-input {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .editing .profile-input {
+            display: block;
+        }
+
+        .editing .profile-value {
+            display: none;
+        }
+
+        /* Edit button */
+        .edit-actions {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .edit-btn {
+            padding: 10px 24px;
+            border: 1.5px solid #00ff41;
+            background: transparent;
+            color: #00ff41;
+            font-size: 0.85em;
+            font-weight: 700;
+            letter-spacing: 1px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            font-family: 'Orbitron', 'Share Tech Mono', monospace;
+            text-transform: uppercase;
+        }
+
+        .edit-btn:hover {
+            background: rgba(0, 255, 65, 0.15);
+            box-shadow: 0 0 12px rgba(0, 255, 65, 0.3);
+        }
+
+        .edit-btn.cancel {
+            border-color: #ff4444;
+            color: #ff4444;
+        }
+
+        .edit-btn.cancel:hover {
+            background: rgba(255, 68, 68, 0.15);
+            box-shadow: 0 0 12px rgba(255, 68, 68, 0.3);
+        }
+
+        .edit-btn.save {
+            border-color: #00ff41;
+            color: #181818;
+            background: #00ff41;
+        }
+
+        .edit-btn.save:hover {
+            box-shadow: 0 0 15px #00ff41;
+        }
+
+        .edit-btn.save:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .edit-btn-group {
+            display: none;
+        }
+
+        .editing .edit-btn-group {
+            display: flex;
+            gap: 12px;
+        }
+
+        .editing .edit-trigger {
+            display: none;
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-size: 0.95em;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.4s ease;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        .toast.success {
+            background: rgba(0, 255, 65, 0.15);
+            border: 1.5px solid #00ff41;
+            color: #00ff41;
+        }
+
+        .toast.error {
+            background: rgba(255, 68, 68, 0.15);
+            border: 1.5px solid #ff4444;
+            color: #ff4444;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
         .stats {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -179,11 +394,12 @@
         }
 
         .stat {
-            background: rgba(0, 255, 65, 0.05);
+            background: rgba(0, 0, 0, 0.55);
             border: 1px solid rgba(0, 255, 65, 0.3);
             border-radius: 8px;
             padding: 20px;
             text-align: center;
+            box-shadow: 0 6px 28px rgba(0,0,0,0.45), 0 0 20px rgba(0,0,0,0.25);
         }
 
         .stat-value {
@@ -221,7 +437,7 @@
         .btn {
             padding: 12px 20px;
             border: 1.5px solid #ffe9a7;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.6);
             color: #ffe9a7;
             text-decoration: none;
             font-size: 0.9em;
@@ -234,6 +450,7 @@
             text-transform: uppercase;
             text-align: center;
             display: block;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
         }
 
         .btn:hover {
@@ -252,6 +469,544 @@
             box-shadow: 0 0 15px #00ff41;
             color: #00ff41;
         }
+
+        .profile-tabs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .profile-tab {
+            padding: 12px 18px;
+            border: 1.5px solid rgba(255, 233, 167, 0.35);
+            border-radius: 6px;
+            background: rgba(0, 0, 0, 0.35);
+            color: #ffe9a7;
+            font-family: 'Orbitron', 'Share Tech Mono', monospace;
+            font-size: 0.8em;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.25s ease;
+        }
+
+        .profile-tab:hover,
+        .profile-tab.active {
+            border-color: #00ff41;
+            color: #00ff41;
+            box-shadow: 0 0 14px rgba(0, 255, 65, 0.16);
+        }
+
+        .profile-panel {
+            display: none;
+        }
+
+        .profile-panel.active {
+            display: block;
+        }
+
+        .section-card {
+            background: rgba(0, 0, 0, 0.78);
+            border: 1.5px solid rgba(255, 233, 167, 0.26);
+            border-radius: 8px;
+            padding: 28px;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,0,0,0.3), 0 0 60px rgba(0,0,0,0.3);
+        }
+
+        .section-intro {
+            color: #bdbd9a;
+            line-height: 1.7;
+            margin: 0 0 24px 0;
+            max-width: 760px;
+        }
+
+        .reward-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 18px;
+            margin-bottom: 24px;
+        }
+
+        .reward-card {
+            background: rgba(0, 0, 0, 0.55);
+            border: 1px solid rgba(0, 255, 65, 0.22);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 6px 28px rgba(0,0,0,0.45), 0 0 20px rgba(0,0,0,0.25);
+        }
+
+        .reward-eyebrow {
+            font-size: 0.78em;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            margin-bottom: 12px;
+        }
+
+        .reward-value {
+            font-size: 1.8em;
+            color: #00ff41;
+            font-family: 'Share Tech Mono', monospace;
+            word-break: break-word;
+        }
+
+        .milestone {
+            margin-bottom: 18px;
+        }
+
+        .milestone:last-child {
+            margin-bottom: 0;
+        }
+
+        .milestone-header {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .milestone-title {
+            color: #e6e6c7;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+        }
+
+        .milestone-progress {
+            color: #00ff41;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        .progress-track {
+            width: 100%;
+            height: 8px;
+            border-radius: 999px;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.08);
+            margin-bottom: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #00b83a, #00ff41);
+            box-shadow: 0 0 10px rgba(0, 255, 65, 0.25);
+            transition: width 0.3s ease;
+        }
+
+        .milestone-copy {
+            color: #a6a67f;
+            line-height: 1.6;
+            font-size: 0.92em;
+        }
+
+        .reward-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            margin-top: 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            font-size: 0.8em;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .reward-status.unlocked {
+            color: #00ff41;
+            border-color: rgba(0, 255, 65, 0.35);
+            background: rgba(0, 255, 65, 0.08);
+        }
+
+        .reward-status.locked {
+            color: #c2c2a3;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .invite-list {
+            margin-top: 24px;
+            display: grid;
+            gap: 12px;
+        }
+
+        .invite-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            align-items: center;
+            padding: 14px 16px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .invite-name {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .invite-meta {
+            color: #9e9e82;
+            font-size: 0.88em;
+            margin-top: 4px;
+        }
+
+        .invite-badges {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .mini-badge {
+            padding: 7px 10px;
+            border-radius: 999px;
+            font-size: 0.72em;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #cfcfaf;
+        }
+
+        .mini-badge.is-on {
+            color: #00ff41;
+            border-color: rgba(0, 255, 65, 0.3);
+            background: rgba(0, 255, 65, 0.08);
+        }
+
+        .performer-card {
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.58), rgba(0, 0, 0, 0.42));
+            border: 1.5px solid rgba(0, 255, 65, 0.18);
+            border-radius: 8px;
+            padding: 28px;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.5), 0 0 60px rgba(0,0,0,0.3);
+        }
+
+        .performer-quote {
+            font-family: 'Orbitron', 'Share Tech Mono', monospace;
+            color: #00ff41;
+            font-size: 1.1em;
+            line-height: 1.6;
+            letter-spacing: 0.04em;
+            margin: 0 0 16px 0;
+        }
+
+        .performer-copy {
+            color: #d0d0b3;
+            line-height: 1.8;
+            max-width: 760px;
+        }
+
+        .profile-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 10002;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: rgba(0, 0, 0, 0.72);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        .profile-modal.is-open {
+            display: flex;
+        }
+
+        .profile-modal-card {
+            width: min(100%, 620px);
+            background: rgba(10, 10, 10, 0.96);
+            border: 1.5px solid rgba(0, 255, 65, 0.22);
+            border-radius: 8px;
+            padding: 28px;
+            box-shadow: 0 18px 60px rgba(0, 0, 0, 0.45);
+        }
+
+        .modal-form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .modal-field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .modal-field.full {
+            grid-column: 1 / -1;
+        }
+
+        .modal-field label {
+            font-size: 0.75em;
+            color: #c9c9a8;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            font-weight: 700;
+        }
+
+        .modal-field input,
+        .modal-field textarea {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 6px;
+            color: #e6e6c7;
+            font-family: 'Montserrat', Arial, sans-serif;
+            font-size: 0.95em;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        .modal-field input:focus,
+        .modal-field textarea:focus {
+            border-color: #00ff41;
+            box-shadow: 0 0 10px rgba(0, 255, 65, 0.16);
+        }
+
+        .modal-field textarea {
+            min-height: 150px;
+            resize: vertical;
+            line-height: 1.6;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 22px;
+        }
+
+        .empty-state {
+            padding: 18px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            color: #a6a67f;
+            line-height: 1.7;
+        }
+
+        /* ── XP Level Hero ── */
+        .xp-hero {
+            background: linear-gradient(135deg, rgba(0,40,15,0.92) 0%, rgba(0,80,30,0.68) 50%, rgba(0,50,20,0.85) 100%);
+            border: 1.5px solid rgba(0,255,65,0.3);
+            border-radius: 14px;
+            padding: 40px 28px 34px;
+            margin-bottom: 32px;
+            text-align: center;
+            box-shadow: 0 12px 50px rgba(0,0,0,0.5), 0 0 80px rgba(0,0,0,0.3), 0 0 30px rgba(0,255,65,0.08), inset 0 1px 0 rgba(0,255,65,0.08);
+        }
+
+        .xp-level-label {
+            font-size: 0.72em;
+            color: rgba(255,255,255,0.45);
+            text-transform: uppercase;
+            letter-spacing: 0.28em;
+            margin-bottom: 2px;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        .xp-level-number {
+            font-family: 'Orbitron', 'Share Tech Mono', monospace;
+            font-size: 4.2em;
+            color: #00ff41;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-shadow: 0 0 40px rgba(0,255,65,0.45), 0 0 80px rgba(0,255,65,0.15);
+            line-height: 1.1;
+        }
+
+        .xp-bar-wrap {
+            margin: 24px auto 0;
+            max-width: 380px;
+        }
+
+        .xp-bar-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.78em;
+            color: rgba(255,255,255,0.5);
+            font-family: 'Share Tech Mono', monospace;
+            margin-bottom: 8px;
+        }
+
+        .xp-bar-track {
+            width: 100%;
+            height: 14px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.06);
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .xp-bar-fill {
+            height: 100%;
+            border-radius: 999px;
+            background: linear-gradient(90deg, #00b83a, #00ff41, #66ff99);
+            box-shadow: 0 0 16px rgba(0,255,65,0.4);
+            transition: width 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .xp-to-next {
+            margin-top: 18px;
+            font-family: 'Orbitron', 'Share Tech Mono', monospace;
+            font-size: 0.78em;
+            color: #ffe9a7;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+        }
+
+        /* Level reward sections */
+        .level-rewards-section {
+            margin-bottom: 28px;
+        }
+
+        .level-rewards-heading {
+            font-family: 'Orbitron', 'Share Tech Mono', monospace;
+            font-size: 0.82em;
+            color: #ffe9a7;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+        }
+
+        .level-reward-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 16px;
+        }
+
+        .level-reward-card {
+            background: rgba(0,0,0,0.7);
+            border: 1.5px solid rgba(0,255,65,0.2);
+            border-radius: 12px;
+            padding: 26px 18px;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 20px rgba(0,0,0,0.3);
+        }
+
+        .level-reward-card.next {
+            border-color: rgba(0,255,65,0.45);
+            background: linear-gradient(180deg, rgba(0,255,65,0.1) 0%, rgba(0,0,0,0.75) 100%);
+            box-shadow: 0 8px 36px rgba(0,0,0,0.5), 0 0 24px rgba(0,255,65,0.1);
+        }
+
+        .level-reward-card.locked {
+            opacity: 0.45;
+            border-color: rgba(255,255,255,0.08);
+            background: rgba(0,0,0,0.6);
+        }
+
+        .level-reward-card .card-level {
+            font-size: 0.7em;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            margin-bottom: 12px;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        .level-reward-card.next .card-level {
+            color: #00ff41;
+        }
+
+        .level-reward-card .card-icon {
+            font-size: 2.4em;
+            margin-bottom: 10px;
+            line-height: 1;
+        }
+
+        .level-reward-card .card-name {
+            font-family: 'Orbitron', 'Share Tech Mono', monospace;
+            font-size: 0.82em;
+            color: #e6e6c7;
+            letter-spacing: 0.08em;
+            font-weight: 700;
+        }
+
+        .level-reward-card.next .card-name {
+            color: #00ff41;
+        }
+
+        .level-reward-card.locked .card-name {
+            color: #666;
+        }
+
+        .level-reward-card .card-lock {
+            margin-top: 10px;
+            font-size: 0.68em;
+            color: #555;
+            letter-spacing: 0.06em;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        .rewards-divider {
+            border: none;
+            border-top: 1px solid rgba(255,233,167,0.12);
+            margin: 36px 0;
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                gap: 15px;
+                padding: 15px 20px;
+            }
+            nav { gap: 20px; }
+            .profile-header {
+                grid-template-columns: 1fr;
+                justify-items: center;
+                gap: 20px;
+                padding: 20px;
+            }
+            .profile-info h1 {
+                text-align: center;
+                font-size: 1.5em;
+            }
+            .edit-actions {
+                justify-content: center;
+            }
+            .modal-form-grid {
+                grid-template-columns: 1fr;
+            }
+            .invite-row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .invite-badges {
+                justify-content: flex-start;
+            }
+            .xp-level-number {
+                font-size: 3em;
+            }
+            .xp-hero {
+                padding: 30px 20px 26px;
+            }
+            .level-reward-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .profile-image-wrapper,
+            .profile-image,
+            .image-overlay,
+            .image-uploading {
+                width: 150px;
+                height: 150px;
+            }
+            .profile-image.placeholder { font-size: 60px; }
+            .profile-info h1 { font-size: 1.2em; }
+            nav { gap: 12px; font-size: 0.85em; }
+        }
     </style>
 </head>
 <body>
@@ -260,6 +1015,7 @@
         <nav>
             <a href="profile.html" class="active">PROFILE</a>
             <a href="events.html">EVENTS</a>
+            <a href="tickets.html">MY TICKETS</a>
         </nav>
         <div class="user-info">
             <div>Welcome, <span id="userName">Member</span></div>
@@ -268,128 +1024,766 @@
     </header>
 
     <div class="container">
-        <div class="profile-header">
-            <div id="profileImageContainer" class="profile-image placeholder">👤</div>
-            <div class="profile-info">
-                <h1 id="profileName">Your Name</h1>
-                
-                <div class="profile-field">
-                    <div class="profile-label">Email</div>
-                    <div class="profile-value" id="profileEmail">email@example.com</div>
-                </div>
+        <!-- Edit actions -->
+        <div class="edit-actions">
+            <button class="edit-btn edit-trigger" onclick="startEditing()">EDIT PROFILE</button>
+            <div class="edit-btn-group">
+                <button class="edit-btn save" id="saveBtn" onclick="saveProfile()">SAVE</button>
+                <button class="edit-btn cancel" onclick="cancelEditing()">CANCEL</button>
+            </div>
+        </div>
 
-                <div class="profile-field">
-                    <div class="profile-label">Phone</div>
-                    <div class="profile-value" id="profilePhone">+1 (555) 555-5555</div>
-                </div>
+        <div class="profile-tabs">
+            <button class="profile-tab active" data-tab="overview" onclick="switchProfileTab('overview')">Overview</button>
+            <button class="profile-tab" data-tab="rewards" onclick="switchProfileTab('rewards')">Rewards</button>
+            <button class="profile-tab" data-tab="perform" onclick="switchProfileTab('perform')">Perform</button>
+        </div>
 
-                <div class="profile-field">
-                    <div class="profile-label">Instagram</div>
-                    <div class="profile-value" id="profileInstagram">@username</div>
-                </div>
-
-                <div class="profile-field">
-                    <div class="profile-label">Bio</div>
-                    <div class="profile-value bio-text" id="profileBio">Your bio goes here</div>
-                </div>
-
-                <div class="stats">
-                    <div class="stat">
-                        <div class="stat-value" id="xpPoints">0</div>
-                        <div class="stat-label">XP Points</div>
+        <div class="profile-panel active" id="overviewPanel">
+            <div class="profile-header" id="profileCard">
+                <div class="profile-image-wrapper">
+                    <div id="profileImageContainer" class="profile-image placeholder"><svg width="80" height="80" viewBox="0 0 80 80" fill="none"><circle cx="40" cy="30" r="14" stroke="#ffe9a7" stroke-width="2"/><path d="M12 70c0-15.5 12.5-28 28-28s28 12.5 28 28" stroke="#ffe9a7" stroke-width="2" fill="none"/></svg></div>
+                    <div class="image-overlay" onclick="document.getElementById('imageInput').click()">
+                        <span class="overlay-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#00ff41" stroke-width="2"><path d="M12 16V4m0 0l-5 5m5-5l5 5"/><rect x="4" y="18" width="16" height="2" rx="1" fill="#00ff41"/></svg></span>
+                        <span class="overlay-text">Change Photo</span>
                     </div>
-                    <div class="stat">
-                        <div class="stat-value" id="friendCount">0</div>
-                        <div class="stat-label">Friends</div>
+                    <div class="image-uploading" id="imageUploading">
+                        <div class="image-spinner"></div>
                     </div>
+                    <input type="file" id="imageInput" accept="image/*" onchange="handleImageSelect(event)">
+                </div>
+
+                <div class="profile-info">
+                    <h1 id="profileName">Your Name</h1>
+                    
+                    <div class="profile-field">
+                        <div class="profile-label">Name</div>
+                        <div class="profile-value" id="profileNameValue">Your Name</div>
+                        <input type="text" class="profile-input" id="editName" placeholder="Your name">
+                    </div>
+
+                    <div class="profile-field">
+                        <div class="profile-label">Email</div>
+                        <div class="profile-value" id="profileEmail">email@example.com</div>
+                        <input type="email" class="profile-input" id="editEmail" placeholder="Email address">
+                    </div>
+
+                    <div class="profile-field">
+                        <div class="profile-label">Phone</div>
+                        <div class="profile-value" id="profilePhone">+46 ...</div>
+                        <input type="tel" class="profile-input" id="editPhone" placeholder="Phone number">
+                    </div>
+
+                    <div class="profile-field">
+                        <div class="profile-label">Instagram</div>
+                        <div class="profile-value" id="profileInstagram">@username</div>
+                        <input type="text" class="profile-input" id="editInstagram" placeholder="@username">
+                    </div>
+
+                    <div class="profile-field">
+                        <div class="profile-label">Bio</div>
+                        <div class="profile-value bio-text" id="profileBio">Your bio goes here</div>
+                        <textarea class="profile-input" id="editBio" placeholder="Tell us about yourself..."></textarea>
+                    </div>
+
+                    <div class="stats">
+                        <div class="stat">
+                            <div class="stat-value" id="xpPoints">0</div>
+                            <div class="stat-label">XP Points</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value" id="friendCount">0</div>
+                            <div class="stat-label">Approved Invites</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-title">MEMBER STATUS</div>
+            <div class="buttons">
+                <a href="events.html" class="btn primary">VIEW EVENTS</a>
+                <a href="tickets.html" class="btn">MY TICKETS</a>
+            </div>
+        </div>
+
+        <div class="profile-panel" id="rewardsPanel">
+            <div class="section-title">MY REWARDS</div>
+
+            <!-- XP Level Hero Card -->
+            <div class="xp-hero" id="xpHero">
+                <div class="xp-level-label">LEVEL</div>
+                <div class="xp-level-number" id="xpLevelNumber">1</div>
+                <div class="xp-bar-wrap">
+                    <div class="xp-bar-labels">
+                        <span id="xpCurrentLabel">0 XP</span>
+                        <span id="xpMaxLabel">100 XP</span>
+                    </div>
+                    <div class="xp-bar-track">
+                        <div class="xp-bar-fill" id="xpBarFill"></div>
+                    </div>
+                </div>
+                <div class="xp-to-next" id="xpToNextText">100 XP TO FREE DRINK</div>
+            </div>
+
+            <!-- Next Reward -->
+            <div class="level-rewards-section">
+                <div class="level-rewards-heading">NEXT REWARD</div>
+                <div class="level-reward-cards">
+                    <div class="level-reward-card next">
+                        <div class="card-level" id="nextRewardLevel">Level 2</div>
+                        <div class="card-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#00ff41" stroke-width="1.5"><path d="M8 2h8l-4 10m0 0v8m-4 0h8M4 2l2 4h12l2-4"/></svg></div>
+                        <div class="card-name">FREE DRINK</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Higher Level Rewards -->
+            <div class="level-rewards-section" id="higherRewardsSection">
+                <div class="level-rewards-heading">HIGHER LEVEL REWARDS</div>
+                <div class="level-reward-cards" id="higherRewardsContainer"></div>
+            </div>
+
+            <hr class="rewards-divider">
+
+            <!-- Invite Rewards -->
+            <div class="section-card">
+                <div class="level-rewards-heading" style="margin-bottom:18px;">INVITE REWARDS</div>
+                <p class="section-intro">Invite strong people into TEK and unlock rewards as your circle grows. Five approved invites unlock a free drink. If those same five go on to buy tickets, you unlock a free ticket.</p>
+
+                <div class="reward-grid">
+                    <div class="reward-card">
+                        <div class="reward-eyebrow">Invite Code</div>
+                        <div class="reward-value" id="rewardInviteCode">—</div>
+                    </div>
+                    <div class="reward-card">
+                        <div class="reward-eyebrow">Approved Invites</div>
+                        <div class="reward-value" id="rewardApprovedCount">0 / 5</div>
+                    </div>
+                    <div class="reward-card">
+                        <div class="reward-eyebrow">Ticket Buyers</div>
+                        <div class="reward-value" id="rewardTicketBuyerCount">0 / 5</div>
+                    </div>
+                </div>
+
+                <div class="milestone">
+                    <div class="milestone-header">
+                        <div class="milestone-title">Free Drink Reward</div>
+                        <div class="milestone-progress" id="approvedProgressText">0 / 5</div>
+                    </div>
+                    <div class="progress-track"><div class="progress-fill" id="approvedProgressBar"></div></div>
+                    <div class="milestone-copy">Invite 5 friends who get approved into TEK and this reward unlocks automatically.</div>
+                    <div class="reward-status locked" id="rewardDrinkStatus">Locked</div>
+                </div>
+
+                <div class="milestone">
+                    <div class="milestone-header">
+                        <div class="milestone-title">Free Ticket Reward</div>
+                        <div class="milestone-progress" id="ticketProgressText">0 / 5</div>
+                    </div>
+                    <div class="progress-track"><div class="progress-fill" id="ticketProgressBar"></div></div>
+                    <div class="milestone-copy">When those 5 invited members each buy a ticket, your free ticket reward unlocks.</div>
+                    <div class="reward-status locked" id="rewardTicketStatus">Locked</div>
+                </div>
+
+                <div class="buttons" style="margin-top:24px;">
+                    <button class="btn primary" type="button" onclick="openReferralModalFromProfile()">REFER A FRIEND</button>
+                </div>
+
+                <div class="invite-list" id="inviteListContainer">
+                    <div class="empty-state">Your invited members will appear here once people start applying through your invite flow.</div>
                 </div>
             </div>
         </div>
 
-        <div class="section-title">MEMBER STATUS</div>
-        <div class="buttons">
-            <a href="events.html" class="btn primary">VIEW EVENTS</a>
-            <a href="events.html" class="btn">BUY TICKETS</a>
+        <div class="profile-panel" id="performPanel">
+            <div class="section-title">APPLY TO PERFORM</div>
+            <div class="performer-card">
+                <p class="performer-quote">We want the best of the culture.</p>
+                <p class="performer-copy">If you have real taste, skill, and something honest to bring to a TEK night, we want to hear from you. This is for artists, DJs, and live performers who may not already have a platform but deserve a serious look. Send us your sound, your links, and what you want to bring into the room.</p>
+                <div class="buttons" style="margin-top:24px;">
+                    <button class="btn primary" type="button" onclick="openPerformerModal()">APPLY TO PERFORM</button>
+                </div>
+            </div>
         </div>
     </div>
 
+    <div class="profile-modal" id="performerModal">
+        <div class="profile-modal-card" role="dialog" aria-modal="true" aria-labelledby="performerModalTitle">
+            <div class="section-title" id="performerModalTitle" style="margin-top:0;">PERFORMER APPLICATION</div>
+            <p class="section-intro" style="margin-bottom:0;">Tell us who you are, where we can hear your work, and what kind of energy you would bring to a TEK night.</p>
+            <div class="modal-form-grid">
+                <div class="modal-field">
+                    <label for="performerName">Name</label>
+                    <input id="performerName" type="text" placeholder="Your name">
+                </div>
+                <div class="modal-field">
+                    <label for="performerEmail">Email</label>
+                    <input id="performerEmail" type="email" placeholder="you@email.com">
+                </div>
+                <div class="modal-field">
+                    <label for="performerInstagram">Instagram</label>
+                    <input id="performerInstagram" type="text" placeholder="@yourhandle">
+                </div>
+                <div class="modal-field">
+                    <label for="performerLinks">Links</label>
+                    <input id="performerLinks" type="text" placeholder="SoundCloud, Mixcloud, Spotify, website">
+                </div>
+                <div class="modal-field full">
+                    <label for="performerPitch">Why should TEK book you?</label>
+                    <textarea id="performerPitch" placeholder="Tell us about your sound, your background, and what you want to bring to the culture."></textarea>
+                </div>
+            </div>
+            <div id="performerStatus" class="section-intro" style="min-height:20px;margin:18px 0 0 0;"></div>
+            <div class="modal-actions">
+                <button class="edit-btn cancel" type="button" onclick="closePerformerModal()">CANCEL</button>
+                <button class="edit-btn save" id="performerSubmitBtn" type="button" onclick="submitPerformerApplication()">SUBMIT APPLICATION</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast notification -->
+    <div class="toast" id="toast"></div>
+
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-functions-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/heic2any/dist/heic2any.min.js"></script>
+    <script src="tek-analytics.js"></script>
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyAMMtUtonXEVkPiRmF5SRYw2r97qUQ-yFo",
             authDomain: "tek-nightclub-app.firebaseapp.com",
             projectId: "tek-nightclub-app",
-            storageBucket: "tek-nightclub-app.appspot.com",
+            storageBucket: "tek-nightclub-app.firebasestorage.app",
             messagingSenderId: "501085259012",
             appId: "1:501085259012:web:f29d88121166df82563c51"
         };
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
+        const auth = firebase.auth();
+        const functions = firebase.app().functions('us-central1');
+        const getInviteStatsCallable = functions.httpsCallable('getInviteStats');
+        const profileImageUploadUrl = 'https://us-central1-tek-nightclub-app.cloudfunctions.net/uploadWebsiteProfileImage';
+        const performerApplicationUrl = 'https://us-central1-tek-nightclub-app.cloudfunctions.net/sendPerformerApplication';
 
+        let currentUserData = {};
+        let userId = null;
+        let isEditing = false;
+        let pendingImageUrl = null; // holds new image URL until save
+        let inviteStatsState = null;
+
+        // ── Load profile ──
         window.addEventListener('load', async function() {
-            const userData = sessionStorage.getItem('userData');
-            const userId = sessionStorage.getItem('userId');
-            const userName = sessionStorage.getItem('userName');
+            const storedData = localStorage.getItem('userData');
+            userId = localStorage.getItem('userId');
 
-            if (!userData || !userId) {
+            if (!storedData || !userId) {
                 window.location.href = 'login.html';
                 return;
             }
 
+            // Ensure anonymous auth is still active (persists via IndexedDB)
+            if (!auth.currentUser) {
+                try { await auth.signInAnonymously(); } catch(e) { console.warn('Auth re-sign-in:', e); }
+            }
+
             try {
-                const user = JSON.parse(userData);
-                
-                // Update header and profile name
-                document.getElementById('userName').textContent = user.name || 'Member';
-                document.getElementById('profileName').textContent = user.name || 'Your Name';
-                document.getElementById('profileEmail').textContent = user.email || 'email@example.com';
-                document.getElementById('profilePhone').textContent = user.phone || '+1 (555) 555-5555';
-                document.getElementById('profileInstagram').textContent = user.instagram || '@username';
+                const user = JSON.parse(storedData);
 
-                // Load profile image if exists
-                if (user.profileImageUrl) {
-                    const imgContainer = document.getElementById('profileImageContainer');
-                    imgContainer.innerHTML = '';
-                    const img = document.createElement('img');
-                    img.src = user.profileImageUrl;
-                    img.className = 'profile-image';
-                    imgContainer.appendChild(img);
-                }
+                // Show cached data immediately
+                renderProfile(user);
 
-                // Fetch live data from Firestore (xpPoints, friends, updated bio)
-                console.log('Fetching live data for user:', userId);
-                const docSnapshot = await db.collection('applications').doc(userId).get();
-                
-                if (docSnapshot.exists) {
-                    const liveData = docSnapshot.data();
-                    console.log('Live user data:', liveData);
-                    
-                    // Update with live data
-                    document.getElementById('profileBio').textContent = liveData.bio || 'Your bio goes here';
-                    document.getElementById('xpPoints').textContent = liveData.xpPoints || '0';
-                    document.getElementById('friendCount').textContent = (liveData.friends ? liveData.friends.length : 0);
+                // Then fetch live data
+                const docSnap = await db.collection('applications').doc(userId).get();
+                if (docSnap.exists) {
+                    currentUserData = docSnap.data();
+                    renderProfile(currentUserData);
+                    // Keep session in sync
+                    localStorage.setItem('userData', JSON.stringify(currentUserData));
+                    localStorage.setItem('userName', currentUserData.name || '');
                 } else {
-                    // Fallback to session data if document doesn't exist
-                    document.getElementById('profileBio').textContent = user.bio || 'Your bio goes here';
-                    document.getElementById('xpPoints').textContent = user.xpPoints || '0';
-                    document.getElementById('friendCount').textContent = (user.friends ? user.friends.length : 0);
+                    currentUserData = user;
                 }
+
+                await loadInviteStats();
             } catch (e) {
                 console.error('Error loading profile:', e);
-                // Fallback to session data on error
-                const user = JSON.parse(sessionStorage.getItem('userData'));
-                document.getElementById('profileBio').textContent = user.bio || 'Your bio goes here';
-                document.getElementById('xpPoints').textContent = user.xpPoints || '0';
-                document.getElementById('friendCount').textContent = (user.friends ? user.friends.length : 0);
+                currentUserData = JSON.parse(storedData);
+                renderProfile(currentUserData);
+            }
+
+            if (window.trackWebsiteEvent) {
+                window.trackWebsiteEvent('page_view', { page: 'profile' });
             }
         });
 
+        function renderProfile(data) {
+            document.getElementById('userName').textContent = data.name || 'Member';
+            document.getElementById('profileName').textContent = data.name || 'Your Name';
+            document.getElementById('profileNameValue').textContent = data.name || 'Your Name';
+            document.getElementById('profileEmail').textContent = data.email || '—';
+            document.getElementById('profilePhone').textContent = data.phone || '—';
+            document.getElementById('profileInstagram').textContent = data.instagram ? ('@' + data.instagram.replace(/^@/, '')) : '—';
+            document.getElementById('profileBio').textContent = data.bio || 'No bio yet';
+            document.getElementById('xpPoints').textContent = data.xpPoints || '0';
+            document.getElementById('friendCount').textContent = inviteStatsState ? inviteStatsState.approvedCount : (data.friends ? data.friends.length : 0);
+
+            // Render XP level bar
+            renderXPLevel(data.xpPoints);
+
+            // Profile image
+            const imgContainer = document.getElementById('profileImageContainer');
+            if (data.profileImageUrl) {
+                imgContainer.className = 'profile-image';
+                imgContainer.innerHTML = '';
+                const img = document.createElement('img');
+                img.src = data.profileImageUrl;
+                img.className = 'profile-image';
+                img.onerror = function() {
+                    imgContainer.className = 'profile-image placeholder';
+                    imgContainer.innerHTML = '<svg width="80" height="80" viewBox="0 0 80 80" fill="none"><circle cx="40" cy="30" r="14" stroke="#ffe9a7" stroke-width="2"/><path d="M12 70c0-15.5 12.5-28 28-28s28 12.5 28 28" stroke="#ffe9a7" stroke-width="2" fill="none"/></svg>';
+                };
+                imgContainer.appendChild(img);
+            } else {
+                imgContainer.className = 'profile-image placeholder';
+                imgContainer.innerHTML = '<svg width="80" height="80" viewBox="0 0 80 80" fill="none"><circle cx="40" cy="30" r="14" stroke="#ffe9a7" stroke-width="2"/><path d="M12 70c0-15.5 12.5-28 28-28s28 12.5 28 28" stroke="#ffe9a7" stroke-width="2" fill="none"/></svg>';
+            }
+        }
+
+        function renderXPLevel(xpPoints) {
+            const xp = parseInt(xpPoints, 10) || 0;
+            const level = Math.floor(xp / 100) + 1;
+            const xpInLevel = xp % 100;
+            const xpMax = 100;
+            const xpToNext = xpMax - xpInLevel;
+
+            document.getElementById('xpLevelNumber').textContent = level;
+            document.getElementById('xpCurrentLabel').textContent = xpInLevel + ' XP';
+            document.getElementById('xpMaxLabel').textContent = xpMax + ' XP';
+            document.getElementById('xpBarFill').style.width = (xpInLevel / xpMax * 100) + '%';
+            document.getElementById('xpToNextText').textContent = xpToNext + ' XP TO FREE DRINK';
+
+            // Next reward card
+            document.getElementById('nextRewardLevel').textContent = 'Level ' + (level + 1);
+
+            // Higher level reward cards (level+2 through level+5)
+            const container = document.getElementById('higherRewardsContainer');
+            let cardsHtml = '';
+            for (let i = level + 2; i <= level + 5; i++) {
+                cardsHtml += '<div class="level-reward-card locked">' +
+                    '<div class="card-level">Level ' + i + '</div>' +
+                    '<div class="card-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="1.5"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></div>' +
+                    '<div class="card-name">LOCKED REWARD</div>' +
+                    '<div class="card-lock">Reach level ' + i + ' to unlock</div>' +
+                '</div>';
+            }
+            container.innerHTML = cardsHtml;
+        }
+
+        function switchProfileTab(tabName) {
+            document.querySelectorAll('.profile-tab').forEach((tab) => {
+                tab.classList.toggle('active', tab.dataset.tab === tabName);
+            });
+            document.getElementById('overviewPanel').classList.toggle('active', tabName === 'overview');
+            document.getElementById('rewardsPanel').classList.toggle('active', tabName === 'rewards');
+            document.getElementById('performPanel').classList.toggle('active', tabName === 'perform');
+        }
+
+        async function loadInviteStats() {
+            try {
+                const result = await getInviteStatsCallable({});
+                inviteStatsState = result.data || null;
+                renderInviteStats(inviteStatsState);
+            } catch (error) {
+                console.warn('Unable to load invite stats:', error);
+                renderInviteStats(null);
+            }
+        }
+
+        function setProgressBar(id, count, total) {
+            const safeCount = Math.max(0, Math.min(count || 0, total));
+            document.getElementById(id).style.width = `${(safeCount / total) * 100}%`;
+        }
+
+        function renderInviteStats(stats) {
+            const approvedCount = stats && typeof stats.approvedCount === 'number' ? stats.approvedCount : 0;
+            const ticketBuyerCount = stats && typeof stats.ticketBuyerCount === 'number' ? stats.ticketBuyerCount : 0;
+            const inviteCode = stats && stats.inviteCode ? stats.inviteCode : 'Pending';
+            const invitedFriends = stats && Array.isArray(stats.invitedFriends) ? stats.invitedFriends : [];
+
+            document.getElementById('rewardInviteCode').textContent = inviteCode;
+            document.getElementById('rewardApprovedCount').textContent = `${approvedCount} / 5`;
+            document.getElementById('rewardTicketBuyerCount').textContent = `${ticketBuyerCount} / 5`;
+            document.getElementById('approvedProgressText').textContent = `${approvedCount} / 5`;
+            document.getElementById('ticketProgressText').textContent = `${ticketBuyerCount} / 5`;
+            document.getElementById('friendCount').textContent = approvedCount;
+
+            setProgressBar('approvedProgressBar', approvedCount, 5);
+            setProgressBar('ticketProgressBar', ticketBuyerCount, 5);
+
+            const drinkStatus = document.getElementById('rewardDrinkStatus');
+            const ticketStatus = document.getElementById('rewardTicketStatus');
+            drinkStatus.textContent = stats && stats.drinkRewardEarned ? 'Unlocked' : 'Locked';
+            drinkStatus.className = `reward-status ${stats && stats.drinkRewardEarned ? 'unlocked' : 'locked'}`;
+            ticketStatus.textContent = stats && stats.freeTicketEarned ? 'Unlocked' : 'Locked';
+            ticketStatus.className = `reward-status ${stats && stats.freeTicketEarned ? 'unlocked' : 'locked'}`;
+
+            const listContainer = document.getElementById('inviteListContainer');
+            if (!invitedFriends.length) {
+                listContainer.innerHTML = '<div class="empty-state">Your invited members will appear here once people start applying through your invite flow.</div>';
+                return;
+            }
+
+            listContainer.innerHTML = invitedFriends.map((friend) => {
+                const name = escapeHtml(friend.name || 'Unknown');
+                const status = escapeHtml(friend.status || 'pending');
+                const approved = status === 'approved';
+                const boughtTicket = !!friend.boughtTicket;
+                return `
+                    <div class="invite-row">
+                        <div>
+                            <div class="invite-name">${name}</div>
+                            <div class="invite-meta">Status: ${status}</div>
+                        </div>
+                        <div class="invite-badges">
+                            <span class="mini-badge ${approved ? 'is-on' : ''}">Approved</span>
+                            <span class="mini-badge ${boughtTicket ? 'is-on' : ''}">Bought Ticket</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function escapeHtml(text) {
+            return String(text || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function openReferralModalFromProfile() {
+            const referButton = document.getElementById('referFab');
+            if (referButton) {
+                referButton.click();
+            }
+        }
+
+        function openPerformerModal() {
+            document.getElementById('performerModal').classList.add('is-open');
+            document.getElementById('performerName').value = currentUserData.name || '';
+            document.getElementById('performerEmail').value = currentUserData.email || '';
+            document.getElementById('performerInstagram').value = currentUserData.instagram ? `@${currentUserData.instagram.replace(/^@/, '')}` : '';
+            document.getElementById('performerStatus').textContent = '';
+        }
+
+        function closePerformerModal() {
+            document.getElementById('performerModal').classList.remove('is-open');
+            document.getElementById('performerStatus').textContent = '';
+        }
+
+        async function submitPerformerApplication() {
+            const submitBtn = document.getElementById('performerSubmitBtn');
+            const statusEl = document.getElementById('performerStatus');
+            const payload = {
+                name: document.getElementById('performerName').value.trim(),
+                email: document.getElementById('performerEmail').value.trim(),
+                instagram: document.getElementById('performerInstagram').value.trim(),
+                links: document.getElementById('performerLinks').value.trim(),
+                pitch: document.getElementById('performerPitch').value.trim(),
+                userId
+            };
+
+            submitBtn.disabled = true;
+            statusEl.textContent = 'Submitting application...';
+            statusEl.style.color = '#c9c9a8';
+
+            try {
+                const response = await fetch(performerApplicationUrl, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json().catch(() => ({}));
+                if (!response.ok) {
+                    throw new Error(result.error || 'Unable to submit application.');
+                }
+
+                statusEl.textContent = 'Application sent. We will review it carefully.';
+                statusEl.style.color = '#00ff41';
+                document.getElementById('performerLinks').value = '';
+                document.getElementById('performerPitch').value = '';
+
+                if (window.trackWebsiteEvent) {
+                    window.trackWebsiteEvent('performer_application_submitted', { page: 'profile' });
+                }
+
+                showToast('Performer application sent', 'success');
+                setTimeout(closePerformerModal, 1200);
+            } catch (error) {
+                statusEl.textContent = error.message || 'Unable to submit application.';
+                statusEl.style.color = '#ff4444';
+            } finally {
+                submitBtn.disabled = false;
+            }
+        }
+
+        // ── Edit mode ──
+        function startEditing() {
+            isEditing = true;
+            pendingImageUrl = null;
+            document.getElementById('profileCard').classList.add('editing');
+            document.querySelector('.edit-actions').classList.add('editing');
+
+            // Pre-fill inputs with current data
+            document.getElementById('editName').value = currentUserData.name || '';
+            document.getElementById('editEmail').value = currentUserData.email || '';
+            document.getElementById('editPhone').value = currentUserData.phone || '';
+            document.getElementById('editInstagram').value = (currentUserData.instagram || '').replace(/^@/, '');
+            document.getElementById('editBio').value = currentUserData.bio || '';
+        }
+
+        function cancelEditing() {
+            isEditing = false;
+            pendingImageUrl = null;
+            document.getElementById('profileCard').classList.remove('editing');
+            document.querySelector('.edit-actions').classList.remove('editing');
+
+            // Restore displayed profile image if we had a pending preview
+            renderProfile(currentUserData);
+        }
+
+        async function saveProfile() {
+            const saveBtn = document.getElementById('saveBtn');
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'SAVING...';
+
+            try {
+                const updates = {};
+                const newName = document.getElementById('editName').value.trim();
+                const newEmail = document.getElementById('editEmail').value.trim();
+                const newPhone = document.getElementById('editPhone').value.trim();
+                const newInstagram = document.getElementById('editInstagram').value.trim().replace(/^@/, '');
+                const newBio = document.getElementById('editBio').value.trim();
+
+                if (newName && newName !== currentUserData.name) updates.name = newName;
+                if (newEmail && newEmail !== currentUserData.email) updates.email = newEmail;
+                if (newPhone !== (currentUserData.phone || '')) updates.phone = newPhone;
+                if (newInstagram !== (currentUserData.instagram || '').replace(/^@/, '')) updates.instagram = newInstagram;
+                if (newBio !== (currentUserData.bio || '')) updates.bio = newBio;
+                if (pendingImageUrl) updates.profileImageUrl = pendingImageUrl;
+
+                if (Object.keys(updates).length === 0) {
+                    showToast('No changes to save', 'error');
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = 'SAVE';
+                    return;
+                }
+
+                // Update Firestore
+                await db.collection('applications').doc(userId).update(updates);
+
+                // Update local state
+                Object.assign(currentUserData, updates);
+                localStorage.setItem('userData', JSON.stringify(currentUserData));
+                if (updates.name) localStorage.setItem('userName', updates.name);
+                if (updates.email) localStorage.setItem('userEmail', updates.email);
+
+                // Exit edit mode & refresh display
+                isEditing = false;
+                pendingImageUrl = null;
+                document.getElementById('profileCard').classList.remove('editing');
+                document.querySelector('.edit-actions').classList.remove('editing');
+                renderProfile(currentUserData);
+
+                if (window.trackWebsiteEvent) {
+                    window.trackWebsiteEvent('profile_updated', { page: 'profile', changedFields: Object.keys(updates) });
+                }
+
+                showToast('Profile updated!', 'success');
+            } catch (err) {
+                console.error('Save error:', err);
+                showToast('Failed to save: ' + (err.message || err), 'error');
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'SAVE';
+            }
+        }
+
+        // ── Image upload ──
+        async function handleImageSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Validate
+            if (!isLikelyImageFile(file)) {
+                showToast('Please select an image file', 'error');
+                return;
+            }
+            if (file.size > 15 * 1024 * 1024) {
+                showToast('Image must be under 15 MB', 'error');
+                return;
+            }
+
+            const uploading = document.getElementById('imageUploading');
+            uploading.classList.add('active');
+
+            try {
+                const imageAsset = await prepareImageAsset(file, 1400, 0.86);
+
+                const response = await fetch(profileImageUploadUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        imageData: imageAsset.dataUrl,
+                        fileName: imageAsset.fileName,
+                        mimeType: imageAsset.mimeType,
+                        userId
+                    })
+                });
+
+                const result = await response.json().catch(() => ({}));
+                if (!response.ok || !result.success || !result.url) {
+                    throw new Error(result.details || result.error || 'Image upload failed');
+                }
+
+                const downloadUrl = result.url;
+
+                pendingImageUrl = downloadUrl;
+
+                // Show preview
+                const imgContainer = document.getElementById('profileImageContainer');
+                imgContainer.className = 'profile-image';
+                imgContainer.innerHTML = '';
+                const img = document.createElement('img');
+                img.src = imageAsset.previewUrl;
+                img.className = 'profile-image';
+                imgContainer.appendChild(img);
+
+                showToast('Photo uploaded — click SAVE to keep it', 'success');
+            } catch (err) {
+                console.error('Image upload error:', err);
+                showToast('Upload failed: ' + (err.message || err), 'error');
+            } finally {
+                uploading.classList.remove('active');
+                event.target.value = ''; // allow re-selecting same file
+            }
+        }
+
+        function isLikelyImageFile(file) {
+            return Boolean(
+                (file.type && file.type.startsWith('image/')) ||
+                /\.(png|jpe?g|webp|gif|heic|heif)$/i.test(file.name || '')
+            );
+        }
+
+        function isHeicLike(file) {
+            return /image\/hei(c|f)/i.test(file.type || '') || /\.(heic|heif)$/i.test(file.name || '');
+        }
+
+        function sanitizeFileName(name) {
+            return (name || 'photo.jpg').replace(/[^a-zA-Z0-9._-]/g, '_');
+        }
+
+        function readFileAsDataUrl(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = () => reject(new Error('Unable to read image file'));
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function resizeDataUrl(dataUrl, maxDim, quality) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = function() {
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > maxDim || height > maxDim) {
+                        if (width > height) {
+                            height = Math.round(height * maxDim / width);
+                            width = maxDim;
+                        } else {
+                            width = Math.round(width * maxDim / height);
+                            height = maxDim;
+                        }
+                    }
+
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    if (!ctx) {
+                        reject(new Error('Unable to process image'));
+                        return;
+                    }
+
+                    ctx.drawImage(img, 0, 0, width, height);
+                    resolve(canvas.toDataURL('image/jpeg', quality));
+                };
+                img.onerror = () => reject(new Error('Unable to process image for upload'));
+                img.src = dataUrl;
+            });
+        }
+
+        async function prepareImageAsset(file, maxDim, quality) {
+            let workingBlob = file;
+            let workingName = file.name || 'photo.jpg';
+
+            if (isHeicLike(file)) {
+                if (typeof heic2any !== 'function') {
+                    throw new Error('HEIC photos are not supported on this device/browser yet');
+                }
+
+                const converted = await heic2any({
+                    blob: file,
+                    toType: 'image/jpeg',
+                    quality
+                });
+
+                workingBlob = Array.isArray(converted) ? converted[0] : converted;
+                workingName = workingName.replace(/\.(heic|heif)$/i, '.jpg');
+            }
+
+            const sourceDataUrl = await readFileAsDataUrl(workingBlob);
+            const optimizedDataUrl = await resizeDataUrl(sourceDataUrl, maxDim, quality);
+
+            return {
+                dataUrl: optimizedDataUrl,
+                previewUrl: optimizedDataUrl,
+                mimeType: 'image/jpeg',
+                fileName: sanitizeFileName(workingName.replace(/\.[^.]+$/, '.jpg'))
+            };
+        }
+
+        // ── Toast ──
+        function showToast(msg, type) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = 'toast ' + type;
+            requestAnimationFrame(() => t.classList.add('show'));
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
         function logout() {
-            sessionStorage.clear();
+            localStorage.clear();
+            auth.signOut();
             window.location.href = 'index.html';
         }
+
+        document.getElementById('performerModal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                closePerformerModal();
+            }
+        });
     </script>
+
+<!-- Refer a Friend floating button -->
+<script src="refer-friend.js"></script>
 </body>
 </html>
